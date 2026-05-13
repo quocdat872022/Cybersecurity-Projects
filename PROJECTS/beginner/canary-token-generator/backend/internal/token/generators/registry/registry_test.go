@@ -4,6 +4,7 @@
 package registry_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -75,6 +76,26 @@ func TestBuild_UnknownTypeReturnsZeroValue(t *testing.T) {
 	g, ok := reg["nonexistent-type"]
 	require.False(t, ok, "unknown type must not be present")
 	require.Nil(t, g, "map zero value for missing key must be nil interface")
+}
+
+func TestBuild_MySQLUsesConfiguredPublicAddress(t *testing.T) {
+	reg := registry.Build(registry.Config{
+		BaseURL:         testBaseURL,
+		MySQLPublicHost: "canary.example.com",
+		MySQLPublicPort: 13306,
+	})
+	g, ok := reg[token.TypeMySQL]
+	require.True(t, ok)
+
+	tok := &token.Token{ID: "abc", Type: token.TypeMySQL}
+	art, err := g.Generate(context.Background(), tok, testBaseURL)
+	require.NoError(t, err)
+	require.Equal(
+		t,
+		"mysql://canary_abc@canary.example.com:13306/internal_db",
+		art.ConnectionString,
+		"mysql connection string must reflect configured public host:port",
+	)
 }
 
 func TestBuild_AllSevenGeneratorsRegistered(t *testing.T) {

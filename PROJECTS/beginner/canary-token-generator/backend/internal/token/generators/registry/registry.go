@@ -16,12 +16,22 @@ import (
 )
 
 type Config struct {
-	BaseURL string
+	BaseURL         string
+	MySQLPublicHost string
+	MySQLPublicPort int
 }
 
 type Registry map[token.Type]generators.Generator
 
-func Build(_ Config) Registry {
+func Build(cfg Config) Registry {
+	host := cfg.MySQLPublicHost
+	port := cfg.MySQLPublicPort
+	var mysqlGen *mysql.Generator
+	if host == "" || port == 0 {
+		mysqlGen = mysql.New()
+	} else {
+		mysqlGen = mysql.NewWithAddress(host, port)
+	}
 	return Registry{
 		token.TypeWebbug:       webbug.New(),
 		token.TypeSlowRedirect: slowredirect.New(),
@@ -29,6 +39,6 @@ func Build(_ Config) Registry {
 		token.TypePDF:          pdf.New(),
 		token.TypeKubeconfig:   kubeconfig.New(),
 		token.TypeEnvfile:      envfile.New(),
-		token.TypeMySQL:        mysql.New(),
+		token.TypeMySQL:        mysqlGen,
 	}
 }

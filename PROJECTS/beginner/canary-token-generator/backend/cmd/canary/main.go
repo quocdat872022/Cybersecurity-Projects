@@ -86,7 +86,11 @@ func run(configPath string) error {
 	}
 	logger.Info("redis connected")
 
-	genRegistry := registry.Build(registry.Config{BaseURL: cfg.Canary.BaseURL})
+	genRegistry := registry.Build(registry.Config{
+		BaseURL:         cfg.Canary.BaseURL,
+		MySQLPublicHost: cfg.MySQL.PublicHost,
+		MySQLPublicPort: cfg.MySQL.PublicPort,
+	})
 	tokenSvc := token.NewService(
 		tokenRepo,
 		registryAdapter{r: genRegistry},
