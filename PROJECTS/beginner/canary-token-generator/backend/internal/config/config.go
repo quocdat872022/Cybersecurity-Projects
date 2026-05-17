@@ -28,10 +28,15 @@ type Config struct {
 	MySQL     MySQLConfig     `koanf:"mysql"`
 	Notify    NotifyConfig    `koanf:"notify"`
 	Operator  OperatorConfig  `koanf:"operator"`
+	GeoIP     GeoIPConfig     `koanf:"geoip"`
 }
 
 type OperatorConfig struct {
 	Token string `koanf:"token"`
+}
+
+type GeoIPConfig struct {
+	Path string `koanf:"path"`
 }
 
 type NotifyConfig struct {
@@ -262,6 +267,8 @@ func loadDefaults(k *koanf.Koanf) error {
 		"notify.fingerprint_window":  "5m",
 
 		"operator.token": "",
+
+		"geoip.path": "/data/GeoLite2-City.mmdb",
 	}
 
 	for key, value := range defaults {
@@ -313,6 +320,7 @@ var envKeyMap = map[string]string{
 	"NOTIFY_TELEGRAM_API_BASE":     "notify.telegram_api_base",
 	"NOTIFY_FINGERPRINT_WINDOW":    "notify.fingerprint_window",
 	"OPERATOR_TOKEN":               "operator.token",
+	"GEOLITE_PATH":                 "geoip.path",
 }
 
 func envKeyReplacer(s string) string {
