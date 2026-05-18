@@ -24,6 +24,11 @@ backend/coverage.html
 backend/.golangci-cache/
 backend/data/
 backend/keys/
+# stray binaries from `go build ./cmd/<name>` run in backend/
+backend/canary
+backend/healthcheck
+backend/buildpdftemplate
+backend/builddocxtemplate
 
 # ----------------------------------------------------------------------------
 # Frontend (Node / Vite)
