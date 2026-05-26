@@ -8,7 +8,7 @@ from typing import Literal
 
 
 Severity = Literal["critical", "high", "medium", "low"]
-OutputFormat = Literal["console", "json", "sarif", "csv"]
+OutputFormat = Literal["console", "json", "sarif", "csv", "html"]
 RedactionStyle = Literal["partial", "full", "none"]
 ScanTargetType = Literal["file", "database", "network"]
 

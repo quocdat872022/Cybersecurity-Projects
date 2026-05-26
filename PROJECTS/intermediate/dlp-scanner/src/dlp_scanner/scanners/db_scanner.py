@@ -128,14 +128,37 @@ class DatabaseScanner:
                     continue
 
                 col_list = ", ".join(f'"{c}"' for c in text_cols)
-                query = (
-                    f"SELECT {col_list} "
-                    f'FROM "{table_name}" '
-                    f"TABLESAMPLE BERNOULLI("
-                    f"{self._db_config.sample_percentage}"
-                    f") LIMIT "
-                    f"{self._db_config.max_rows_per_table}"
-                )
+                # query = (
+                #     f"SELECT {col_list} "
+                #     f'FROM "{table_name}" '
+                #     f"TABLESAMPLE BERNOULLI("
+                #     f"{self._db_config.sample_percentage}"
+                #     f") LIMIT "
+                #     f"{self._db_config.max_rows_per_table}"
+                # )
+                
+                # Check Postgres version first (do this once in _scan_postgres)
+                version_row = await conn.fetchval("SHOW server_version_num")
+                pg_version = int(version_row)
+
+                # Then in the per-table loop:
+                if pg_version >= 90500:
+                    query = (
+                        f"SELECT {col_list} "
+                        f'FROM "{table_name}" '
+                        f"TABLESAMPLE BERNOULLI("
+                        f"{self._db_config.sample_percentage}"
+                        f") LIMIT "
+                        f"{self._db_config.max_rows_per_table}"
+                    )
+                else:
+                    # Fallback for Postgres < 9.5 (e.g. 8.3 on Metasploitable2)
+                    query = (
+                        f"SELECT {col_list} "
+                        f'FROM "{table_name}" '
+                        f"ORDER BY random() "
+                        f"LIMIT {self._db_config.max_rows_per_table}"
+                    )
 
                 rows = await conn.fetch(query)
                 self._process_record_rows(
