@@ -12,6 +12,8 @@ from dlp_scanner.constants import (
 
 RULE_FRAMEWORK_MAP: dict[str,
                          list[str]] = {
+                             "PII_DOB": ["HIPAA",
+                                         "GDPR"],
                              "PII_SSN": ["HIPAA",
                                          "CCPA",
                                          "GLBA",
@@ -64,11 +66,15 @@ RULE_FRAMEWORK_MAP: dict[str,
                              "NET_DNS_EXFIL_TXT_VOLUME": [],
                              "NET_ENCODED_BASE64": [],
                              "NET_ENCODED_HEX": [],
+                             
                          }
 
 RULE_REMEDIATION_MAP: dict[
     str,
     str] = {
+        "PII_DOB": (
+            "Add remediation for date of birth."
+        ),
         "PII_SSN": (
             "Remove or encrypt SSNs. Use tokenization "
             "for storage. Never store in plaintext."

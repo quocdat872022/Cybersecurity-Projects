@@ -23,10 +23,13 @@ from dlp_scanner.detectors.rules.financial import (
 )
 from dlp_scanner.detectors.rules.health import HEALTH_RULES
 from dlp_scanner.detectors.rules.pii import PII_RULES
+from dlp_scanner.detectors.rules.pii_extended import PII_EXTENDED_RULES
+
 
 
 ALL_RULES: list[DetectionRule] = [
     *PII_RULES,
+    *PII_EXTENDED_RULES,
     *FINANCIAL_RULES,
     *CREDENTIAL_RULES,
     *HEALTH_RULES,
