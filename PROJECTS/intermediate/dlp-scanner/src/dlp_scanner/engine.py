@@ -22,6 +22,8 @@ from dlp_scanner.reporters.json_report import (
     JsonReporter,
 )
 from dlp_scanner.reporters.sarif import SarifReporter
+from dlp_scanner.reporters.html_report import HtmlReporter
+
 from dlp_scanner.scanners.db_scanner import (
     DatabaseScanner,
 )
@@ -41,6 +43,7 @@ REPORTER_MAP: dict[str,
                        "json": JsonReporter,
                        "sarif": SarifReporter,
                        "csv": CsvReporter,
+                       "html": HtmlReporter,
                    }
 
 

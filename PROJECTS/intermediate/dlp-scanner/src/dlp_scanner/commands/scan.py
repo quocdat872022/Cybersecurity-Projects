@@ -10,7 +10,7 @@ from typing import Annotated, Any
 import typer
 
 
-FORMAT_HELP: str = ("Output format (console, json, sarif, csv)")
+FORMAT_HELP: str = ("Output format (console, json, sarif, csv, html)")
 OUTPUT_HELP: str = "Write report to file"
 VALID_FORMATS: frozenset[str] = frozenset(
     {
@@ -18,6 +18,7 @@ VALID_FORMATS: frozenset[str] = frozenset(
         "json",
         "sarif",
         "csv",
+        "html"
     }
 )
 
@@ -163,10 +164,11 @@ def _run_scan(
 
     config: ScanConfig
     cfg_path = Path(config_path) if config_path else None
-    if cfg_path and cfg_path.exists():
-        config = load_config(cfg_path)
-    else:
-        config = ScanConfig()
+    # if cfg_path and cfg_path.exists():
+    #     config = load_config(cfg_path)
+    # else:
+    #     config = ScanConfig()
+    config = load_config(cfg_path)
 
     config.output.format = output_format
     if output_file:
