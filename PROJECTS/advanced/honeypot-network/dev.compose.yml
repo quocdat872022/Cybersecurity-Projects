@@ -14,7 +14,7 @@ services:
       - dev-pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U hive"]
-      interval: 5s
+      interval: 5s  
       timeout: 5s
       retries: 5
 
