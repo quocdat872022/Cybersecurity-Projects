@@ -7,8 +7,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml frontend/pnpm.config.yaml ./
+RUN pnpm install --frozen-lockfile --ignore-scripts && pnpm rebuild @parcel/watcher esbuild
 
 COPY frontend/ .
 
