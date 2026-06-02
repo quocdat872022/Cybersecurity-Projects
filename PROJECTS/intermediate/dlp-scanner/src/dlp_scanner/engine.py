@@ -5,6 +5,8 @@ engine.py
 
 
 import structlog
+import typer
+from typing import Any
 
 from dlp_scanner.config import ScanConfig
 from dlp_scanner.constants import OutputFormat
@@ -64,18 +66,25 @@ class ScanEngine:
             context_window_tokens = (detection.context_window_tokens),
         )
 
-    def scan_files(self, target: str) -> ScanResult:
+    def scan_files(self, target: str, ctx: typer.Context) -> ScanResult:
         """
         Scan filesystem target for sensitive data
         """
-        scanner = FileScanner(self._config, self._registry)
+        no_cache: bool = ctx.obj.get("no_cache", False)
+
+        scanner = FileScanner(self._config, self._registry, use_cache=not no_cache)
         result = scanner.scan(target)
         log.info(
             "file_scan_complete",
             target = target,
             findings = len(result.findings),
             targets = result.targets_scanned,
+            cache_used=not no_cache,
         )
+        # Optional: close cache on engine level if needed
+        if hasattr(scanner, 'close'):
+            scanner.close()
+            
         return result
 
     def scan_database(self, target: str) -> ScanResult:

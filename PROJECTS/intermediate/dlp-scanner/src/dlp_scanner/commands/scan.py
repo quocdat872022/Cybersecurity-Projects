@@ -181,9 +181,12 @@ def _run_scan(
         "db": engine.scan_database,
         "network": engine.scan_network,
     }
-
-    result = scan_methods[scan_type](target)
-
+    # Pass ctx only to file scanner (others don't need it)
+    if scan_type == "file":
+        result = scan_methods[scan_type](target, ctx)
+    else:
+        result = scan_methods[scan_type](target)
+    
     if output_file:
         engine.write_report(result, output_file)
         typer.echo(f"Report written to {output_file}")

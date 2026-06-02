@@ -38,9 +38,9 @@ Why not reuse _is_excluded?
 import fnmatch
 from datetime import datetime, UTC
 from pathlib import Path
-
+from dataclasses import is_dataclass, asdict
 import structlog
-
+from typing import Optional
 from dlp_scanner.config import ScanConfig
 from dlp_scanner.detectors.registry import DetectorRegistry
 from dlp_scanner.extractors.archive import ArchiveExtractor
@@ -68,7 +68,7 @@ from dlp_scanner.extractors.structured import (
 )
 from dlp_scanner.models import ScanResult
 from dlp_scanner.scoring import match_to_finding
-
+from dlp_scanner.scanners.cache import ScanCache
 
 log = structlog.get_logger()
 
@@ -83,17 +83,27 @@ class FileScanner:
         self,
         config: ScanConfig,
         registry: DetectorRegistry,
+        use_cache: bool = True
     ) -> None:
         self._file_config = config.file
+        self._config_parent = config
         self._detection_config = config.detection
         self._redaction_style = config.output.redaction_style
         self._registry = registry
+        self._use_cache = use_cache
+        self._cache: Optional[ScanCache] = None
         self._extension_map = _build_extension_map()
         self._allowed_extensions = frozenset(
             self._file_config.include_extensions
         )
         # Wire up the allowlist file_patterns that already exist in config but were never read.  Store as a tuple for fast iteration; an empty tuple means "no path-level allowlisting" (zero overhead on the hot path when the field is not configured).
         self._allowlist_patterns: tuple[str, ...] = tuple(config.detection.allowlists.file_patterns)
+        
+        # Initialize cache next to config if enabled
+        if use_cache:
+            cache_path = Path.home() / ".dlp-scanner-cache.db"
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            self._cache = ScanCache(cache_path)
 
     def scan(self, target: str) -> ScanResult:
         """
@@ -102,14 +112,20 @@ class FileScanner:
         result = ScanResult()
         target_path = Path(target)
 
+        scanned_paths: set[str] = set()
+
         if target_path.is_file():
-            self._scan_file(target_path, result)
+            self._scan_file(target_path, result, scanned_paths)
             result.targets_scanned = 1
         elif target_path.is_dir():
-            self._scan_directory(target_path, result)
+            self._scan_directory(target_path, result, scanned_paths)
         else:
             result.errors.append(f"Target not found: {target}")
 
+        # Cleanup stale cache entries
+        if self._cache:
+            self._cache.cleanup_deleted(scanned_paths)
+            
         result.scan_completed_at = datetime.now(UTC)
         return result
 
@@ -117,6 +133,7 @@ class FileScanner:
         self,
         directory: Path,
         result: ScanResult,
+        scanned_paths: set[str]
     ) -> None:
         """
         Recursively walk a directory and scan matching files
@@ -163,24 +180,20 @@ class FileScanner:
             if file_size == 0:
                 continue
 
-            self._scan_file(path, result)
+            self._scan_file(path, result, scanned_paths)
             result.targets_scanned += 1
 
     def _scan_file(
         self,
         path: Path,
         result: ScanResult,
+        scanned_paths: set[str]
     ) -> None:
         """
         Extract text from a single file and run detection
+        Scan single file with cache support
         """
-        # Guard the single-file entry point too.  When the user runs:
-        #   dlp-scan file test_data.txt
-        # …the path is passed straight here without going through
-        # _scan_directory, so we need the allowlist check in both places.
-        # For single-file scans we match against the file's own name because
-        # there is no meaningful "base directory" to compute a relative path
-        # from; patterns like "test_*" are always filename patterns anyway.
+        scanned_paths.add(str(path.absolute()))
         if self._allowlist_patterns:
             if any(
                 fnmatch.fnmatch(path.name, pat) for pat in self._allowlist_patterns
@@ -191,7 +204,14 @@ class FileScanner:
                     patterns= list(self._allowlist_patterns),
                 )
                 return
-
+        # === CACHE CHECK ===
+        if self._use_cache and self._cache:
+            cached_findings = self._cache.get_cached_findings(path, self._config_parent or self, self._registry)
+            if cached_findings is not None:
+                log.info("cache_hit", path=str(path), findings=len(cached_findings))
+                result.findings.extend(cached_findings)
+                return
+            
         suffix = _get_full_suffix(path)
         extractor = self._extension_map.get(suffix)
 
@@ -206,7 +226,7 @@ class FileScanner:
             return
 
         min_confidence = (self._detection_config.min_confidence)
-
+        file_findings = []
         for chunk in chunks:
             matches = self._registry.detect(chunk.text)
             for match in matches:
@@ -219,8 +239,27 @@ class FileScanner:
                     chunk.location,
                     self._redaction_style,
                 )
-                result.findings.append(finding)
+                file_findings.append(finding)
 
+        # === CACHE SAVE ===
+        if self._use_cache and self._cache:
+            findings_dict = []
+            for f in file_findings:
+                if hasattr(f, "model_dump"):
+                    findings_dict.append(f.model_dump())
+
+                elif is_dataclass(f):
+                    findings_dict.append(asdict(f))
+
+                elif hasattr(f, "__dict__"):
+                    findings_dict.append(f.__dict__)
+
+                else:
+                    raise TypeError(
+                        f"Cannot serialize finding type: {type(f)}"
+        )
+            self._cache.save_findings(path, findings_dict, self._config_parent or self, self._registry)
+            
     def _is_excluded(
         self,
         path: Path,
@@ -281,9 +320,10 @@ class FileScanner:
                 return True
         
         return False
-
-
-         
+    def close(self):
+        """Call on shutdown"""
+        if self._cache:
+            self._cache.close()
 
 
 def _build_extension_map() -> dict[str, Extractor]:
