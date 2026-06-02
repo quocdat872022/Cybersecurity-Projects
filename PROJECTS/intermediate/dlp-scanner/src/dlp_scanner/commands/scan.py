@@ -152,7 +152,6 @@ def _run_scan(
     target: str,
     output_format: str,
     output_file: str,
-    *,
     no_cache: bool = False,
 ) -> None:
     """
@@ -187,10 +186,6 @@ def _run_scan(
 
     config: ScanConfig
     cfg_path = Path(config_path) if config_path else None
-    # if cfg_path and cfg_path.exists():
-    #     config = load_config(cfg_path)
-    # else:
-    #     config = ScanConfig()
     config = load_config(cfg_path)
 
     config.output.format = output_format
@@ -199,16 +194,13 @@ def _run_scan(
 
     engine = ScanEngine(config)
 
-    scan_methods = {
-        "file": engine.scan_files,
-        "db": engine.scan_database,
-        "network": engine.scan_network,
-    }
-    # Pass ctx only to file scanner (others don't need it)
+    
     if scan_type == "file":
-        result = scan_methods[scan_type](target, ctx)
-    else:
-        result = scan_methods[scan_type](target)
+        result = engine.scan_files(target, no_cache=no_cache)
+    elif scan_type == "db":
+        result = engine.scan_database(target)
+    elif scan_type == "network":
+        result = engine.scan_network(target)
     
     if output_file:
         engine.write_report(result, output_file)

@@ -1,6 +1,10 @@
 """
 ©AngelaMos | 2026
 engine.py
+
+Challenge 4 change: ``scan_files`` now accepts a ``no_cache`` keyword
+argument that is forwarded to ``FileScanner``.  All other behaviour is
+unchanged.
 """
 
 
@@ -66,25 +70,29 @@ class ScanEngine:
             context_window_tokens = (detection.context_window_tokens),
         )
 
-    def scan_files(self, target: str, ctx: typer.Context) -> ScanResult:
+    def scan_files(self, target: str, no_cache: bool = False,) -> ScanResult:
         """
         Scan filesystem target for sensitive data
-        """
-        no_cache: bool = ctx.obj.get("no_cache", False)
 
-        scanner = FileScanner(self._config, self._registry, use_cache=not no_cache)
+        Parameters
+        ----------
+        target:
+            File or directory path to scan.
+        no_cache:
+            When True, bypass the hash cache and force a full rescan.
+            Results are still written back to the cache so future
+            incremental runs benefit.
+        """
+        scanner = FileScanner(self._config, self._registry, no_cache=no_cache)
         result = scanner.scan(target)
         log.info(
             "file_scan_complete",
             target = target,
             findings = len(result.findings),
             targets = result.targets_scanned,
-            cache_used=not no_cache,
+            no_cache=no_cache,
         )
-        # Optional: close cache on engine level if needed
-        if hasattr(scanner, 'close'):
-            scanner.close()
-            
+
         return result
 
     def scan_database(self, target: str) -> ScanResult:
