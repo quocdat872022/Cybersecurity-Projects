@@ -43,13 +43,6 @@ def main(
             help = "Path to config YAML file",
         ),
     ] = "",
-    no_cache: Annotated[
-        bool,
-        typer.Option(
-            "--no-cache",
-            help = "Disable cache and force full scan",
-        ),
-    ] = False,
     verbose: Annotated[
         bool,
         typer.Option(
@@ -74,7 +67,7 @@ def main(
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config
     ctx.obj["verbose"] = verbose
-    ctx.obj["no_cache"] = no_cache
+    
 
 
 register(app)

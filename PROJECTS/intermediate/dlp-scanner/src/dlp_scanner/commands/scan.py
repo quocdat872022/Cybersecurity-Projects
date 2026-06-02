@@ -1,6 +1,11 @@
 """
 ©AngelaMos | 2026
 scan.py
+
+Challenge 4 change: the ``file`` sub-command gains a ``--no-cache`` /
+``-N`` flag that forces a full rescan while still writing results back to
+the cache for future runs.
+
 """
 
 
@@ -12,6 +17,10 @@ import typer
 
 FORMAT_HELP: str = ("Output format (console, json, sarif, csv, html)")
 OUTPUT_HELP: str = "Write report to file"
+NO_CACHE_HELP: str = (
+    "Bypass the hash cache and force a full rescan. "
+    "Results are still cached for future incremental runs."
+)
 VALID_FORMATS: frozenset[str] = frozenset(
     {
         "console",
@@ -45,11 +54,23 @@ def scan_file(
             help = OUTPUT_HELP,
         ),
     ] = "",
+    no_cache: Annotated[
+        bool,
+        typer.Option(
+            "--no-cache",
+            "-N",
+            help = NO_CACHE_HELP,
+            is_flag = True,
+        ),
+    ] = False,
 ) -> None:
     """
     Scan files and directories for sensitive data
+    
+    On repeated scans only files whose SHA-256 hash has changed since the
+    last run are re-processed.  Use --no-cache to force a full rescan.
     """
-    _run_scan(ctx, "file", target, output_format, output_file)
+    _run_scan(ctx, "file", target, output_format, output_file, no_cache=no_cache)
 
 
 def scan_db(
@@ -131,6 +152,8 @@ def _run_scan(
     target: str,
     output_format: str,
     output_file: str,
+    *,
+    no_cache: bool = False,
 ) -> None:
     """
     Shared scan execution logic
