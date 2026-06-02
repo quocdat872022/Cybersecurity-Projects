@@ -9,8 +9,6 @@ unchanged.
 
 
 import structlog
-import typer
-from typing import Any
 
 from dlp_scanner.config import ScanConfig
 from dlp_scanner.constants import OutputFormat
@@ -43,36 +41,41 @@ from dlp_scanner.scanners.network_scanner import (
 
 log = structlog.get_logger()
 
-REPORTER_MAP: dict[str,
-                   type] = {
-                       "console": ConsoleReporter,
-                       "json": JsonReporter,
-                       "sarif": SarifReporter,
-                       "csv": CsvReporter,
-                       "html": HtmlReporter,
-                   }
+REPORTER_MAP: dict[str, type] = {
+    "console": ConsoleReporter,
+    "json": JsonReporter,
+    "sarif": SarifReporter,
+    "csv": CsvReporter,
+    "html": HtmlReporter,
+}
 
 
 class ScanEngine:
     """
-    Orchestrates the full scan pipeline
+    Orchestrates the full scan pipeline.
     """
+
     def __init__(self, config: ScanConfig) -> None:
         self._config = config
         detection = config.detection
         allowlist_vals = detection.allowlists.values
         self._registry = DetectorRegistry(
-            enable_patterns = detection.enable_rules,
-            disable_patterns = detection.disable_rules,
-            allowlist_values = (
+            enable_patterns=detection.enable_rules,
+            disable_patterns=detection.disable_rules,
+            allowlist_values=(
                 frozenset(allowlist_vals) if allowlist_vals else None
             ),
-            context_window_tokens = (detection.context_window_tokens),
+            context_window_tokens=(detection.context_window_tokens),
         )
 
-    def scan_files(self, target: str, no_cache: bool = False,) -> ScanResult:
+    def scan_files(
+        self,
+        target: str,
+        *,
+        no_cache: bool = False,
+    ) -> ScanResult:
         """
-        Scan filesystem target for sensitive data
+        Scan filesystem target for sensitive data.
 
         Parameters
         ----------
@@ -83,43 +86,46 @@ class ScanEngine:
             Results are still written back to the cache so future
             incremental runs benefit.
         """
-        scanner = FileScanner(self._config, self._registry, no_cache=no_cache)
+        scanner = FileScanner(
+            self._config,
+            self._registry,
+            no_cache=no_cache,
+        )
         result = scanner.scan(target)
         log.info(
             "file_scan_complete",
-            target = target,
-            findings = len(result.findings),
-            targets = result.targets_scanned,
+            target=target,
+            findings=len(result.findings),
+            targets=result.targets_scanned,
             no_cache=no_cache,
         )
-
         return result
 
     def scan_database(self, target: str) -> ScanResult:
         """
-        Scan database target for sensitive data
+        Scan database target for sensitive data.
         """
         scanner = DatabaseScanner(self._config, self._registry)
         result = scanner.scan(target)
         log.info(
             "database_scan_complete",
-            target = target,
-            findings = len(result.findings),
-            targets = result.targets_scanned,
+            target=target,
+            findings=len(result.findings),
+            targets=result.targets_scanned,
         )
         return result
 
     def scan_network(self, target: str) -> ScanResult:
         """
-        Scan network capture file for sensitive data
+        Scan network capture file for sensitive data.
         """
         scanner = NetworkScanner(self._config, self._registry)
         result = scanner.scan(target)
         log.info(
             "network_scan_complete",
-            target = target,
-            findings = len(result.findings),
-            targets = result.targets_scanned,
+            target=target,
+            findings=len(result.findings),
+            targets=result.targets_scanned,
         )
         return result
 
@@ -129,7 +135,7 @@ class ScanEngine:
         output_format: OutputFormat | None = None,
     ) -> str:
         """
-        Generate report string in the requested format
+        Generate report string in the requested format.
         """
         fmt = output_format or self._config.output.format
         reporter_cls = REPORTER_MAP[fmt]
@@ -142,7 +148,7 @@ class ScanEngine:
         result: ScanResult,
     ) -> None:
         """
-        Display Rich-formatted results to console
+        Display Rich-formatted results to console.
         """
         reporter = ConsoleReporter()
         reporter.display(result)
@@ -154,13 +160,13 @@ class ScanEngine:
         output_format: OutputFormat | None = None,
     ) -> None:
         """
-        Generate report and write to file
+        Generate report and write to file.
         """
         content = self.generate_report(result, output_format)
         with open(output_path, "w") as f:
             f.write(content)
         log.info(
             "report_written",
-            path = output_path,
-            format = output_format or self._config.output.format,
+            path=output_path,
+            format=output_format or self._config.output.format,
         )
