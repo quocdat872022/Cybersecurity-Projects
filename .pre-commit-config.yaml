@@ -406,9 +406,9 @@ repos:
       - id: check-symlinks
         exclude: (\.pnpm-store|node_modules)/
       - id: end-of-file-fixer
-        exclude: (\.pnpm-store|node_modules)/
+        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/
       - id: trailing-whitespace
-        exclude: (\.pnpm-store|node_modules)/
+        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/
       - id: check-illegal-windows-names
         exclude: (\.pnpm-store|node_modules)/
       - id: check-executables-have-shebangs
