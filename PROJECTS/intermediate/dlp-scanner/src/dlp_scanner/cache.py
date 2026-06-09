@@ -117,6 +117,19 @@ _SELECT_META = "SELECT value FROM cache_meta WHERE key = ?"
 
 _STATS = "SELECT COUNT(*), SUM(finding_count) FROM file_cache"
 
+_DETAILED_STATS = """
+SELECT
+    COUNT(*)                                          AS total_files,
+    COALESCE(SUM(finding_count), 0)                  AS total_findings,
+    COALESCE(SUM(CASE WHEN finding_count  > 0
+                      THEN 1 ELSE 0 END), 0)         AS files_with_findings,
+    COALESCE(SUM(CASE WHEN finding_count  = 0
+                      THEN 1 ELSE 0 END), 0)         AS clean_files,
+    COALESCE(MIN(scan_time), '')                      AS oldest_scan,
+    COALESCE(MAX(scan_time), '')                      AS newest_scan
+FROM file_cache
+"""
+
 _PRUNE = "DELETE FROM file_cache WHERE file_path = ?"
 
 
@@ -397,6 +410,60 @@ class ScanCache:
             "cached_files": count or 0,
             "total_cached_findings": int(total_findings or 0),
         }
+    
+    def detailed_stats(self) -> dict[str, object]:
+        """
+        Return richer cache statistics for human-readable display.
+ 
+        Keys
+        ----
+        total_files          : int   – rows in file_cache
+        total_findings       : int   – sum of all finding_count values
+        files_with_findings  : int   – rows where finding_count > 0
+        clean_files          : int   – rows where finding_count == 0
+        oldest_scan          : str   – ISO-8601 timestamp of the earliest
+                                       cached scan, or '' if the cache is empty
+        newest_scan          : str   – ISO-8601 timestamp of the most recent
+                                       cached scan, or '' if the cache is empty
+        db_size_bytes        : int   – size of the SQLite file on disk
+        rule_set_hash_prefix : str   – first 12 hex chars of the stored
+                                       rule_set_hash, or '' if not yet set
+        """
+        row = self._conn.execute(_DETAILED_STATS).fetchone()
+        (
+            total_files,
+            total_findings,
+            files_with_findings,
+            clean_files,
+            oldest_scan,
+            newest_scan,
+        ) = row
+ 
+        try:
+            db_size = self._db_path.stat().st_size
+        except OSError:
+            db_size = 0
+ 
+        meta_row = self._conn.execute(
+            _SELECT_META, ("rule_set_hash",)
+        ).fetchone()
+        rule_hash_prefix = (meta_row[0][:12] + "…") if meta_row else ""
+ 
+        return {
+            "total_files": int(total_files or 0),
+            "total_findings": int(total_findings or 0),
+            "files_with_findings": int(files_with_findings or 0),
+            "clean_files": int(clean_files or 0),
+            "oldest_scan": oldest_scan or "",
+            "newest_scan": newest_scan or "",
+            "db_size_bytes": db_size,
+            "rule_set_hash_prefix": rule_hash_prefix,
+        }
+ 
+    @property
+    def db_path(self) -> Path:
+        """The filesystem path of the SQLite cache database."""
+        return self._db_path
 
     # ── Convenience ──────────────────────────────────────────────────────────
 
