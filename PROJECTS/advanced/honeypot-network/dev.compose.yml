@@ -70,6 +70,7 @@ services:
     depends_on:
       - backend
     environment:
+      CI: true
       VITE_API_TARGET: http://backend:8000
       VITE_WS_TARGET: ws://backend:8000
     ports:

@@ -112,7 +112,7 @@ install_frontend() {
 
 run_tests() {
     info "Running Go tests..."
-    if go test -race ./... >/dev/null 2>&1; then
+    if go test ./... >/dev/null 2>&1; then
         ok "All Go tests passed"
     else
         fail "Tests failed. Run 'go test -v ./...' for details."

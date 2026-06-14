@@ -162,7 +162,7 @@ func Default() *Config {
 			ServerVersion: RedisBanner,
 		},
 		Database: DatabaseConfig{
-			DSN:            "postgres://hive:hive@localhost:5432/hive?sslmode=disable",
+			DSN:            "postgres://hive:hive@localhost:53743/hive?sslmode=disable",
 			PoolMin:        DefaultDBPoolMin,
 			PoolMax:        DefaultDBPoolMax,
 			ConnTimeout:    DefaultDBTimeout,
@@ -170,7 +170,7 @@ func Default() *Config {
 			MigrationsPath: "migrations",
 		},
 		Stream: StreamConfig{
-			URL:       "redis://localhost:16379",
+			URL:       "redis://localhost:16329",
 			StreamKey: DefaultRedisStreamKey,
 			MaxLen:    DefaultRedisMaxLen,
 		},
