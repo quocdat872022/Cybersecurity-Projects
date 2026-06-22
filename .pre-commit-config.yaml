@@ -258,6 +258,33 @@ repos:
         files: ^PROJECTS/advanced/monitor-the-situation-dashboard/frontend/src/
         pass_filenames: false
 
+      - id: biome-ja3-ja4-tls-fingerprinting
+        name: biome check (ja3-ja4-tls-fingerprinting frontend)
+        entry: bash -c 'cd PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/frontend && pnpm biome check .'
+        language: system
+        files: ^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/frontend/src/
+        pass_filenames: false
+
+  # Stylelint SCSS Checks
+  - repo: local
+    hooks:
+      - id: stylelint-ja3-ja4-tls-fingerprinting
+        name: stylelint (ja3-ja4-tls-fingerprinting frontend)
+        entry: bash -c 'cd PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/frontend && pnpm stylelint "**/*.scss"'
+        language: system
+        files: ^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/frontend/src/
+        pass_filenames: false
+
+  # TypeScript tsc Checks
+  - repo: local
+    hooks:
+      - id: tsc-ja3-ja4-tls-fingerprinting
+        name: tsc typecheck (ja3-ja4-tls-fingerprinting frontend)
+        entry: bash -c 'cd PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/frontend && pnpm tsc --noEmit'
+        language: system
+        files: ^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/frontend/src/
+        pass_filenames: false
+
   # Nim nph Checks
   - repo: local
     hooks:
@@ -284,6 +311,22 @@ repos:
         entry: bash -c 'cd PROJECTS/intermediate/binary-analysis-tool/backend && cargo clippy --all-targets --all-features -- -D warnings'
         language: system
         files: ^PROJECTS/intermediate/binary-analysis-tool/backend/
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-fmt-ja3-ja4-tls-fingerprinting
+        name: cargo fmt (ja3-ja4-tls-fingerprinting)
+        entry: bash -c 'cd PROJECTS/intermediate/ja3-ja4-tls-fingerprinting && cargo fmt --all -- --check'
+        language: system
+        files: ^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-clippy-ja3-ja4-tls-fingerprinting
+        name: cargo clippy (ja3-ja4-tls-fingerprinting)
+        entry: bash -c 'cd PROJECTS/intermediate/ja3-ja4-tls-fingerprinting && cargo clippy --workspace --all-targets -- -D warnings'
+        language: system
+        files: ^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/
         types: [rust]
         pass_filenames: false
 
@@ -406,9 +449,9 @@ repos:
       - id: check-symlinks
         exclude: (\.pnpm-store|node_modules)/
       - id: end-of-file-fixer
-        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/
+        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/|^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/crates/tlsfp-intel/seeds/
       - id: trailing-whitespace
-        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/
+        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/|^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/crates/tlsfp-intel/seeds/
       - id: check-illegal-windows-names
         exclude: (\.pnpm-store|node_modules)/
       - id: check-executables-have-shebangs
