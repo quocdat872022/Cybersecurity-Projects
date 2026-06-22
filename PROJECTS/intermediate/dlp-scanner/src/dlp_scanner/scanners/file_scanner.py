@@ -60,6 +60,13 @@ previous run) but does **not** re-add findings to ``result.findings`` – this
 is intentional: we only report findings that were freshly detected in this
 run, keeping output stable and deterministic.  Callers that need historical
 findings should use the JSON report from the last full scan.
+
+Challenge 5 change summary
+---------------------------
+``FileScanner`` now accepts the ``ComplianceConfig`` from the root
+``ScanConfig`` and passes it through to :func:`match_to_finding`.  This
+allows the compliance severity-override policy to be applied consistently
+across all scan types without touching detection logic.
 """
 
 
@@ -73,7 +80,7 @@ from dlp_scanner.cache import (
     ScanCache,
     compute_rule_set_hash,
 )
-from dlp_scanner.config import ScanConfig
+from dlp_scanner.config import ScanConfig, ComplianceConfig
 from dlp_scanner.detectors.registry import DetectorRegistry
 from dlp_scanner.extractors.archive import ArchiveExtractor
 from dlp_scanner.extractors.base import Extractor
@@ -147,6 +154,8 @@ class FileScanner:
         )
         # Populated in scan(); declared here so type-checkers are happy.
         self._cache: ScanCache | None = None
+        # Challenge 5: store compliance config for severity override
+        self._compliance_config: ComplianceConfig = config.compliance
 
     # ── Public entry point ───────────────────────────────────────────────────
 
@@ -340,6 +349,7 @@ class FileScanner:
                     chunk.text,
                     chunk.location,
                     self._redaction_style,
+                    compliance_config = self._compliance_config,
                 )
                 result.findings.append(finding)
 

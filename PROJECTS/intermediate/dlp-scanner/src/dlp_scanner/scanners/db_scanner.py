@@ -1,6 +1,12 @@
 """
 ©AngelaMos | 2026
 db_scanner.py
+
+Challenge 5 change summary
+---------------------------
+``DatabaseScanner`` now stores ``config.compliance`` and forwards it as
+``compliance_config`` to every :func:`~dlp_scanner.scoring.match_to_finding`
+call in ``_append_findings``.  No detection logic is changed.
 """
 
 
@@ -11,7 +17,7 @@ from urllib.parse import urlparse
 
 import structlog
 
-from dlp_scanner.config import ScanConfig
+from dlp_scanner.config import ScanConfig, ComplianceConfig
 from dlp_scanner.constants import (
     TEXT_DB_COLUMN_TYPES_MYSQL,
     TEXT_DB_COLUMN_TYPES_PG,
@@ -57,6 +63,8 @@ class DatabaseScanner:
         self._detection_config = config.detection
         self._redaction_style = config.output.redaction_style
         self._registry = registry
+        # Challenge 5: store compliance config for severity override
+        self._compliance_config: ComplianceConfig = config.compliance
 
     def scan(self, target: str) -> ScanResult:
         """
@@ -504,7 +512,10 @@ class DatabaseScanner:
         column_name: str = "",
     ) -> None:
         """
-        Convert detector matches to findings and append
+        Convert detector matches to findings and append.
+
+        Challenge 5: passes ``compliance_config`` so the severity floor
+        policy is applied here too.
         """
         min_confidence = (self._detection_config.min_confidence)
 
@@ -524,6 +535,7 @@ class DatabaseScanner:
                 text,
                 location,
                 self._redaction_style,
+                compliance_config = self._compliance_config,
             )
             result.findings.append(finding)
 

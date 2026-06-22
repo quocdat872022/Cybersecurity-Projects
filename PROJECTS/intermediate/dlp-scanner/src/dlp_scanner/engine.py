@@ -53,6 +53,11 @@ REPORTER_MAP: dict[str, type] = {
 class ScanEngine:
     """
     Orchestrates the full scan pipeline.
+
+    The :attr:`~dlp_scanner.config.ComplianceConfig.severity_overrides`
+    mapping read from the config is forwarded to every scanner so that
+    the severity floor is applied uniformly across file, database, and
+    network scans.
     """
 
     def __init__(self, config: ScanConfig) -> None:
@@ -67,6 +72,14 @@ class ScanEngine:
             ),
             context_window_tokens=(detection.context_window_tokens),
         )
+
+        # Log active severity overrides at startup so operators can confirm the policy is loaded correctly.
+        overrides = config.compliance.severity_overrides
+        if overrides:
+            log.info(
+                "compliance_severity_overrides_loaded",
+                overrides = overrides,
+            )
 
     def scan_files(
         self,

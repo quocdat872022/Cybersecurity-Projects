@@ -21,6 +21,7 @@ from dlp_scanner.constants import (
     DEFAULT_MAX_FILE_SIZE_MB,
     DEFAULT_MIN_CONFIDENCE,
     SCANNABLE_EXTENSIONS,
+    SEVERITY_ORDER,
     OutputFormat,
     RedactionStyle,
     Severity,
@@ -85,15 +86,83 @@ class DetectionConfig(BaseModel):
 
 class ComplianceConfig(BaseModel):
     """
-    Configuration for compliance framework mapping
+    Configuration for compliance framework mapping.
+
+    ``severity_overrides`` maps a compliance framework name to a minimum
+    severity floor.  Any finding whose compliance_frameworks list contains
+    that framework will be elevated to at least that severity level,
+    regardless of the confidence-derived severity.
+ 
+    Example YAML::
+ 
+        compliance:
+          frameworks:
+            - HIPAA
+            - PCI_DSS
+          severity_overrides:
+            PCI_DSS: "high"   # any unencrypted PAN is at least high
+            HIPAA: "medium"   # PHI findings are at least medium
     """
     frameworks: list[str] = Field(
         default_factory = lambda: [
             "HIPAA",
             "PCI_DSS",
             "GDPR",
-            "CCPA",]
+            "CCPA",
+            ]
     )
+    severity_overrides: dict[str, Severity] = Field(
+        default_factory = dict
+    )
+ 
+    def effective_severity(
+        self,
+        confidence_severity: Severity,
+        compliance_frameworks: list[str],
+    ) -> tuple[Severity, str | None]:
+        """
+        Return the effective severity and the framework that caused an
+        override (or ``None`` if no override was applied).
+ 
+        The severity returned is the *maximum* of the confidence-derived
+        severity and the highest floor mandated by any framework in
+        ``compliance_frameworks``.  "Maximum" is defined by
+        :data:`~dlp_scanner.constants.SEVERITY_ORDER` where ``critical``
+        (order 0) is highest and ``low`` (order 3) is lowest.
+ 
+        :param confidence_severity:  Severity derived from the raw
+            confidence score (e.g. ``"low"`` for a 0.35-confidence match).
+        :param compliance_frameworks: Frameworks associated with the
+            finding (e.g. ``["PCI_DSS", "GLBA"]``).
+        :returns: A ``(severity, override_reason)`` pair.  If the severity
+            was not overridden ``override_reason`` is ``None``; otherwise it
+            is the name of the framework that imposed the floor
+            (e.g. ``"PCI_DSS"``).
+        """
+        if not self.severity_overrides:
+            return confidence_severity, None
+ 
+        best_floor: Severity | None = None
+        triggered_by: str | None = None
+ 
+        for framework in compliance_frameworks:
+            floor = self.severity_overrides.get(framework)
+            if floor is None:
+                continue
+            if (
+                best_floor is None
+                or SEVERITY_ORDER[floor] < SEVERITY_ORDER[best_floor]
+            ):
+                best_floor = floor
+                triggered_by = framework
+ 
+        if best_floor is None:
+            return confidence_severity, None
+ 
+        if SEVERITY_ORDER[best_floor] < SEVERITY_ORDER[confidence_severity]:
+            return best_floor, triggered_by
+ 
+        return confidence_severity, None
 
 
 class OutputConfig(BaseModel):
