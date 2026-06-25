@@ -15,6 +15,7 @@ Comprehensive list of free and premium learning platforms, courses, and training
 - [edX Cybersecurity Programs](https://www.edx.org/professional-certificate/cybersecurity) - Professional certificates
 - [freeCodeCamp](https://www.youtube.com/freecodecamp) - Free comprehensive courses
 - [Codecademy Cybersecurity](https://www.codecademy.com/catalog/subject/cybersecurity) - Interactive coding
+- [CertGames](https://certgames.com/) - Gamified cert prep: 25k+ practice questions, AI tools, and training games
 
 ### Premium Platforms
 
