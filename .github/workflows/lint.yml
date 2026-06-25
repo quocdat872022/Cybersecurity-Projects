@@ -109,6 +109,10 @@ jobs:
           - name: monitor-the-situation-dashboard-frontend
             type: biome
             path: PROJECTS/advanced/monitor-the-situation-dashboard/frontend
+          # Frontend (biome + stylelint + tsc)
+          - name: ja3-ja4-tls-fingerprinting-frontend
+            type: frontend
+            path: PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/frontend
           # Go
           - name: simple-vulnerability-scanner
             type: go
@@ -142,6 +146,9 @@ jobs:
           - name: binary-analysis-tool-backend
             type: rust
             path: PROJECTS/intermediate/binary-analysis-tool/backend
+          - name: ja3-ja4-tls-fingerprinting
+            type: rust
+            path: PROJECTS/intermediate/ja3-ja4-tls-fingerprinting
           # Crystal
           - name: credential-rotation-enforcer
             type: crystal
@@ -184,21 +191,21 @@ jobs:
       if: matrix.type == 'ruff'
       run: pip install ruff
 
-    # Biome Setup
+    # Biome / Frontend Setup
     - name: Setup Node.js
-      if: matrix.type == 'biome'
+      if: matrix.type == 'biome' || matrix.type == 'frontend'
       uses: actions/setup-node@v4
       with:
         node-version: '22'
 
     - name: Setup pnpm
-      if: matrix.type == 'biome'
+      if: matrix.type == 'biome' || matrix.type == 'frontend'
       uses: pnpm/action-setup@v4
       with:
         version: 10
 
     - name: Cache pnpm store
-      if: matrix.type == 'biome'
+      if: matrix.type == 'biome' || matrix.type == 'frontend'
       uses: actions/cache@v4
       with:
         path: ~/.local/share/pnpm/store/v10
@@ -208,7 +215,7 @@ jobs:
           ${{ runner.os }}-pnpm-
 
     - name: Install frontend dependencies
-      if: matrix.type == 'biome'
+      if: matrix.type == 'biome' || matrix.type == 'frontend'
       run: pnpm install --frozen-lockfile
 
     # Go Setup
@@ -331,6 +338,41 @@ jobs:
           echo "Biome found issues!"
         fi
         cat biome-output.txt
+      continue-on-error: true
+
+    # Frontend Linting (biome + stylelint + tsc)
+    - name: Run Biome, Stylelint, and tsc
+      if: matrix.type == 'frontend'
+      id: frontend
+      run: |
+        FRONTEND_OK=true
+        echo "Running Biome check..."
+        if pnpm biome check . > frontend-output.txt 2>&1; then
+          echo "biome: no issues"
+        else
+          FRONTEND_OK=false
+          echo "biome: issues found"
+        fi
+        echo "Running Stylelint..."
+        if pnpm stylelint "**/*.scss" >> frontend-output.txt 2>&1; then
+          echo "stylelint: no issues"
+        else
+          FRONTEND_OK=false
+          echo "stylelint: issues found"
+        fi
+        echo "Running tsc --noEmit..."
+        if pnpm tsc --noEmit >> frontend-output.txt 2>&1; then
+          echo "tsc: no issues"
+        else
+          FRONTEND_OK=false
+          echo "tsc: type errors found"
+        fi
+        if [[ "$FRONTEND_OK" == "true" ]]; then
+          echo "FRONTEND_PASSED=true" >> $GITHUB_ENV
+        else
+          echo "FRONTEND_PASSED=false" >> $GITHUB_ENV
+        fi
+        cat frontend-output.txt
       continue-on-error: true
 
     # Go Linting
@@ -589,6 +631,35 @@ jobs:
           fi
         } >> $GITHUB_STEP_SUMMARY
 
+    # Create Summary for Frontend
+    - name: Create Frontend Lint Summary
+      if: matrix.type == 'frontend'
+      run: |
+        {
+          echo "## Lint Results: ${{ matrix.name }}"
+          echo ''
+          if [[ "${{ env.FRONTEND_PASSED }}" == "true" ]]; then
+            echo '### Biome + Stylelint + tsc: **Passed**'
+            echo 'No frontend issues found.'
+          else
+            echo '### Biome + Stylelint + tsc: **Issues Found**'
+            echo '<details><summary>View output</summary>'
+            echo ''
+            echo '```'
+            head -100 frontend-output.txt
+            echo '```'
+            echo '</details>'
+          fi
+          echo ''
+          if [[ "${{ env.FRONTEND_PASSED }}" == "true" ]]; then
+            echo '---'
+            echo '### All checks passed!'
+          else
+            echo '---'
+            echo '### Review the issues above'
+          fi
+        } >> $GITHUB_STEP_SUMMARY
+
     # Create Summary for Go
     - name: Create Go Lint Summary
       if: matrix.type == 'go'
@@ -807,6 +878,11 @@ jobs:
         elif [[ "${{ matrix.type }}" == "biome" ]]; then
           if [[ "${{ env.BIOME_PASSED }}" == "false" ]]; then
             echo "Biome lint checks failed"
+            exit 1
+          fi
+        elif [[ "${{ matrix.type }}" == "frontend" ]]; then
+          if [[ "${{ env.FRONTEND_PASSED }}" == "false" ]]; then
+            echo "Frontend lint checks failed"
             exit 1
           fi
         elif [[ "${{ matrix.type }}" == "go" ]]; then
