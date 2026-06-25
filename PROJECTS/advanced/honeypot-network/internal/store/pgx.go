@@ -75,7 +75,7 @@ func (s *PgxStore) EnsurePartitions(
 		)
 		suffix := start.Format("y2006m01")
 
-		for _, table := range []string{"events", "sessions"} {
+		for _, table := range []string{"events", "sessions", "credentials"} {
 			query := fmt.Sprintf(
 				`CREATE TABLE IF NOT EXISTS %s_%s
 				PARTITION OF %s
