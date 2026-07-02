@@ -17,6 +17,7 @@ dependencies = [
     "structlog>=25.5.0,<26.0.0",
     "pyyaml>=6.0.3",
     "gunicorn>=25.0.3",
+    "requests",
 ]
 
 [project.optional-dependencies]
