@@ -221,10 +221,7 @@ prod-restart:
     docker compose --env-file .env.prod -f compose.yml -f cloudflared.compose.yml logs -f
 
 [group('tunnel')]
-prod-redeploy:
-    docker compose --env-file .env.prod -f compose.yml -f cloudflared.compose.yml down
-    docker compose --env-file .env.prod -f compose.yml -f cloudflared.compose.yml up -d --build
-    docker compose --env-file .env.prod -f compose.yml -f cloudflared.compose.yml logs -f
+redeploy: (tunnel-down "--remove-orphans") (tunnel-start "--remove-orphans")
 
 [group('tunnel')]
 prod-logs *SERVICE:

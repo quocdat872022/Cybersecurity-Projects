@@ -32,10 +32,7 @@ Official exam objectives documents for all major CompTIA certifications:
 
 ### Free Practice Tests
 
-- [CertNova](https://www.certnova.com/) - Free practice tests
-- [ExamCompass](https://www.examcompass.com/) - Practice exams
-- [ExamDigest](https://examsdigest.com/) - Exam resources
-- [Quizlet](https://quizlet.com/) - Flashcards & quizzes
+- [CertGames](https://certgames.com/) - 25,000+ free practice questions across every major certification, plus Learn lessons and an exam readiness score
 
 ### Premium Practice Tests
 
@@ -120,6 +117,7 @@ Official exam objectives documents for all major CompTIA certifications:
 - [Boson CISSP Practice Exams](https://www.boson.com/practice-exam/cissp-isc2-practice-exam)
 - [TotalTester CISSP Practice Exams](https://www.totalsem.com/cissp-practice-tests/)
 - [CISSP Pocket Prep Mobile App](https://pocketprep.com/exam-bank/isc2-cissp/)
+- [CertGames CISSP Practice](https://certgames.com/) - Gamified CISSP practice questions, free
 
 **Udemy Courses:**
 - [CISSP Certification Complete Training 2025](https://www.udemy.com/course/cissp-certification-cissp-training/)
