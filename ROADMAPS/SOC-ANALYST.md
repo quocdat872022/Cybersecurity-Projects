@@ -8,7 +8,7 @@ SOC Analysts monitor, detect, investigate, and respond to cybersecurity threats.
 
 ---
 
-> **Studying for the certifications below?** Practice with [CertGames](https://certgames.com) — 18,000+ practice questions across 18 certifications (CompTIA, AWS, Cisco, ISC2), 5 security training games, and 11 AI learning tools. Free to start, no credit card required. **[Start practicing free](https://certgames.com)**
+> **Studying for the certifications below?** [CertGames](https://certgames.com) is the platform I built to run this whole journey in one place: 25,000+ practice questions across 20 certifications (CompTIA, AWS, Cisco, ISC2), Learn lessons that teach each exam objective, guided projects you build from scratch, these career roadmaps with progress tracking, and deep analytics like an exam readiness score. Free, no credit card required. **[Start practicing free](https://certgames.com)**
 
 ---
 
@@ -143,7 +143,7 @@ Practice SOC skills with these projects:
 
 ---
 
-> **The certification grind is rough.** Make it less painful with [CertGames](https://certgames.com) — gamified practice tests where you earn XP, level up, build streaks, and compete on leaderboards. 18,000+ questions across 18 certs. Free to start. **[certgames.com](https://certgames.com)**
+> **The certification grind is rough.** Make it less painful with [CertGames](https://certgames.com): gamified practice where you earn XP, level up, build streaks, and compete on leaderboards, plus Learn lessons, guided projects, and roadmaps to keep you moving. 25,000+ questions across 20 certifications. Free, no credit card. **[certgames.com](https://certgames.com)**
 
 ---
 
