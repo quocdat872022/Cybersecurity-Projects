@@ -28,6 +28,7 @@ def register_blueprints(app: Flask) -> None:
     from app.routes.alerts import alerts_bp
     from app.routes.rules import rules_bp
     from app.routes.scenarios import scenarios_bp
+    from app.routes.cors import cors_bp
 
     app.register_blueprint(auth_bp, url_prefix = f"{API_PREFIX}/auth")
     app.register_blueprint(admin_bp, url_prefix = f"{API_PREFIX}/admin")
@@ -36,3 +37,5 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(alerts_bp, url_prefix = f"{API_PREFIX}/alerts")
     app.register_blueprint(rules_bp, url_prefix = f"{API_PREFIX}/rules")
     app.register_blueprint(scenarios_bp, url_prefix = f"{API_PREFIX}/scenarios")
+    app.register_blueprint(cors_bp, url_prefix = f"{API_PREFIX}/cors-scan")
+
