@@ -5,7 +5,7 @@
 // Binary upload landing page with drag-and-drop file
 // intake and analysis pipeline visualization
 //
-// Renders the Axumortem specimen intake interface: an
+// Renders the Axumortem subject intake interface: an
 // animated SVG grain background, hex offset margin
 // decoration (16 addresses), corner brackets, meta
 // strip header, and format support badges (ELF/PE/
@@ -143,7 +143,7 @@ export function Component(): React.ReactElement {
       <div className={styles.cornerBR} aria-hidden="true" />
 
       <header className={styles.metaStrip}>
-        <span>AXM-001</span>
+        <span>SPECIMEN-005</span>
         <span className={styles.metaCenter}>STATIC ANALYSIS SUITE</span>
         <span>v0.1.1</span>
       </header>
@@ -164,7 +164,7 @@ export function Component(): React.ReactElement {
 
       <section className={styles.intake}>
         <div className={styles.intakeHeader}>
-          <span className={styles.intakeLabel}>SPECIMEN INTAKE</span>
+          <span className={styles.intakeLabel}>SUBJECT INTAKE</span>
           {file && (
             <button
               type="button"
@@ -211,7 +211,7 @@ export function Component(): React.ReactElement {
               className={styles.dropPrompt}
               onClick={() => inputRef.current?.click()}
             >
-              <span className={styles.dropStatus}>AWAITING SPECIMEN</span>
+              <span className={styles.dropStatus}>AWAITING SUBJECT</span>
               <span className={styles.dropInstruction}>
                 DRAG + DROP BINARY / CLICK TO BROWSE
               </span>
@@ -226,7 +226,7 @@ export function Component(): React.ReactElement {
             onClick={handleSubmit}
             disabled={upload.isPending}
           >
-            {upload.isPending ? 'ANALYZING\u2026' : 'SUBMIT SPECIMEN'}
+            {upload.isPending ? 'ANALYZING\u2026' : 'SUBMIT SUBJECT'}
           </button>
         )}
       </section>
@@ -250,7 +250,7 @@ export function Component(): React.ReactElement {
       <footer className={styles.footer}>
         <span>&copy; ANGELAMOS 2026</span>
         <span className={styles.footerDesignation}>
-          SYS AXM-BDE {'//'} UNIT-001
+          SYS AXM-BDE {'//'} SPECIMEN-005
         </span>
         <span>AXUMORTEM</span>
       </footer>

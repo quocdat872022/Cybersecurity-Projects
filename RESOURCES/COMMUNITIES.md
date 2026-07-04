@@ -141,6 +141,7 @@ Connect with cybersecurity professionals, educators, and communities across YouT
 - [The Hacker News](https://thehackernews.com/) - Breaking cybersecurity news
 - [Threatpost](https://threatpost.com/) - Security news
 - [SecurityWeek](https://www.securityweek.com/) - Enterprise security news
+- [CyberBrief](https://certgames.com/) - Cybersecurity news and cert-prep newsletter
 
 ---
 

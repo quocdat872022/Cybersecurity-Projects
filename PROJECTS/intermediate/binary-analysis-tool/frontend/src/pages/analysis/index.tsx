@@ -120,7 +120,7 @@ export function Component(): React.ReactElement {
   if (isLoading) {
     return (
       <div className={styles.state}>
-        <span className={styles.stateLabel}>ANALYZING SPECIMEN\u2026</span>
+        <span className={styles.stateLabel}>ANALYZING SUBJECT\u2026</span>
       </div>
     )
   }
@@ -129,7 +129,7 @@ export function Component(): React.ReactElement {
     return (
       <div className={styles.state}>
         <span className={styles.stateCode}>404</span>
-        <span className={styles.stateLabel}>SPECIMEN NOT FOUND</span>
+        <span className={styles.stateLabel}>SUBJECT NOT FOUND</span>
         <Link to={ROUTES.HOME} className={styles.stateBack}>
           NEW ANALYSIS
         </Link>

@@ -2,6 +2,8 @@
 
 A comprehensive collection of tools, courses, certifications, communities, and frameworks for cybersecurity professionals and learners.
 
+[![Learn Cybersecurity at CertGames](https://img.shields.io/badge/Learn_Cybersecurity-CertGames-C41E3A?style=flat&labelColor=0D0D0D)](https://certgames.com)
+
 ## Resource Categories
 
 ### [Tools](./TOOLS.md)
@@ -35,6 +37,7 @@ Industry frameworks (NIST, ISO, MITRE), compliance standards (PCI-DSS, HIPAA, GD
 - [Hack The Box](https://www.hackthebox.com/) - Penetration testing labs
 - [HackTheBox Academy](https://academy.hackthebox.com/) - Structured learning paths
 - [Cybrary](https://www.cybrary.it) - Free cybersecurity courses
+- [CertGames](https://certgames.com/) - Practice questions, Learn lessons, guided projects, and roadmaps, all gamified. FREE
 
 ---
 
@@ -56,6 +59,7 @@ Industry frameworks (NIST, ISO, MITRE), compliance standards (PCI-DSS, HIPAA, GD
 - Start with foundational certifications (Security+, A+)
 - Progress to specialized certifications based on your career goals
 - Build hands-on experience with [Projects](../PROJECTS/)
+- Do all of it in one place with [CertGames](https://certgames.com) - Learn lessons, practice questions, guided projects, and roadmap progress tracking. FREE
 
 ---
 

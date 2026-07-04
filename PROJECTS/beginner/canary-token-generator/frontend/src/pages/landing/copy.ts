@@ -12,7 +12,7 @@ export const PAGE_COPY = {
     'Field-deployable trip-wires for the quiet hours. Each specimen waits in place, reports when touched, and leaves a forensic note behind.',
   STRIP_FIELD_STATION: 'FIELD STATION',
   STRIP_ISSUE: 'ISSUE',
-  STRIP_VOLUME: 'VOL.001',
+  STRIP_VOLUME: 'SPEC.003',
   STRIP_FOLIO: 'FOLIO',
   SECTION_01_INDEX: '01 / SPECIES',
   SECTION_01_TITLE: 'SELECT SPECIES',

@@ -154,6 +154,9 @@ ps:
 # =============================================================================
 
 [group('tunnel')]
+redeploy: (tunnel-down "--remove-orphans") build (tunnel-start "--remove-orphans")
+
+[group('tunnel')]
 tunnel-up *ARGS:
     docker compose --env-file .env -f compose.yml -f cloudflared.compose.yml up {{ARGS}}
 
