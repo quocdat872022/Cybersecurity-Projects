@@ -19,14 +19,30 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/CarterPerez-dev/hive/internal/config"
 	"github.com/CarterPerez-dev/hive/internal/session"
 	"github.com/CarterPerez-dev/hive/internal/sshd"
 	"github.com/CarterPerez-dev/hive/pkg/types"
 )
+
+func buildTelnetMOTD(srcIP string) string {
+	now := time.Now().UTC()
+
+	return fmt.Sprintf(
+		config.TelnetMOTDTemplate,
+		120+rand.Intn(30), // updates count
+		1+rand.Intn(3),    // security updates
+		now.Add(-time.Duration(rand.Intn(72))*time.Hour).
+			Format("Mon Jan  2 15:04:05 -0700 2006"),
+		srcIP,
+		10+rand.Intn(20), // pts number
+	)
+}
 
 func (s *TelnetService) readLine(
 	conn net.Conn, r *bufio.Reader, echoInput bool,
@@ -116,13 +132,6 @@ func (s *TelnetService) runShell(
 	username string,
 	recorder *session.Recorder,
 ) {
-
-	banner := fmt.Sprintf(
-		config.TelnetMOTDTemplate,
-	)
-
-	writeAndRecord(conn, recorder, []byte(banner))
-
 	fs := sshd.NewFakeFS(s.cfg.Telnet.Hostname)
 	cmdCtx := &sshd.CommandContext{
 		FS:       fs,
@@ -130,6 +139,9 @@ func (s *TelnetService) runShell(
 		Username: username,
 		CWD:      "/root",
 	}
+
+	motd := buildTelnetMOTD(srcIP)
+	writeAndRecord(conn, recorder, []byte(motd))
 
 	prompt := func() string {
 		return fmt.Sprintf(
