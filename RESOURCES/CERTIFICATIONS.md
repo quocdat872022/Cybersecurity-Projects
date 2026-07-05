@@ -32,7 +32,7 @@ Official exam objectives documents for all major CompTIA certifications:
 
 ### Free Practice Tests
 
-- [CertGames](https://certgames.com/) - 25,000+ free practice questions across every major cert
+- [CertGames](https://certgames.com/) - 25,000+ free practice questions across every major certification, plus Learn lessons and an exam readiness score
 
 ### Premium Practice Tests
 

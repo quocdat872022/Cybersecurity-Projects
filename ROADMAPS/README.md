@@ -68,7 +68,7 @@ Structured certification paths for different cybersecurity career tracks. Each r
 
 ---
 
-> **Studying for the certifications below?** Practice with [CertGames](https://certgames.com) — 25,000+ practice questions across 20 certifications (CompTIA, AWS, Cisco, ISC2), 6 security training games, roadmaps with progress tracking, and deep analytics like an exam readiness score. Free, no credit card required. **[Start practicing free](https://certgames.com)**
+> **Studying for the certifications below?** [CertGames](https://certgames.com) is the platform I built to run this whole journey in one place: 25,000+ practice questions across 20 certifications (CompTIA, AWS, Cisco, ISC2), Learn lessons that teach each exam objective, guided projects you build from scratch, these career roadmaps with progress tracking, and deep analytics like an exam readiness score. Free, no credit card required. **[Start practicing free](https://certgames.com)**
 
 ---
 
@@ -134,7 +134,7 @@ Structured certification paths for different cybersecurity career tracks. Each r
 
 ---
 
-> **The certification grind is rough.** Make it less painful with [CertGames](https://certgames.com) — gamified practice tests where you earn XP, level up, build streaks, and compete on leaderboards. 25,000+ questions across 20 certs. Free! **[certgames.com](https://certgames.com)**
+> **The certification grind is rough.** Make it less painful with [CertGames](https://certgames.com): gamified practice where you earn XP, level up, build streaks, and compete on leaderboards, plus Learn lessons, guided projects, and roadmaps to keep you moving. 25,000+ questions across 20 certifications. Free, no credit card. **[certgames.com](https://certgames.com)**
 
 ---
 
