@@ -37,6 +37,7 @@ import (
 	"github.com/CarterPerez-dev/hive/internal/smbd"
 	"github.com/CarterPerez-dev/hive/internal/sshd"
 	"github.com/CarterPerez-dev/hive/internal/store"
+	"github.com/CarterPerez-dev/hive/internal/telnetd"
 	"github.com/CarterPerez-dev/hive/internal/ui"
 	"github.com/CarterPerez-dev/hive/pkg/types"
 )
@@ -259,6 +260,14 @@ func buildServices(
 	if cfg.Redis.Enabled {
 		services = append(services,
 			redisd.New(
+				cfg, bus, logger, tracker, limiter,
+			),
+		)
+	}
+
+	if cfg.Telnet.Enabled {
+		services = append(services,
+			telnetd.New(
 				cfg, bus, logger, tracker, limiter,
 			),
 		)

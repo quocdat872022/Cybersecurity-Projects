@@ -12,6 +12,7 @@ export const SERVICE_TYPE_VALUES = [
   'smb',
   'mysql',
   'redis',
+  'telnet'
 ] as const
 
 export const ServiceType = {
@@ -21,6 +22,7 @@ export const ServiceType = {
   SMB: 'smb',
   MYSQL: 'mysql',
   REDIS: 'redis',
+  TELNET: 'telnet',
 } as const
 
 export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType]

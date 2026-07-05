@@ -30,24 +30,27 @@ const (
 	ServiceSMB
 	ServiceMySQL
 	ServiceRedis
+	ServiceTelnet
 )
 
 var serviceNames = map[ServiceType]string{
-	ServiceSSH:   "ssh",
-	ServiceHTTP:  "http",
-	ServiceFTP:   "ftp",
-	ServiceSMB:   "smb",
-	ServiceMySQL: "mysql",
-	ServiceRedis: "redis",
+	ServiceSSH:    "ssh",
+	ServiceHTTP:   "http",
+	ServiceFTP:    "ftp",
+	ServiceSMB:    "smb",
+	ServiceMySQL:  "mysql",
+	ServiceRedis:  "redis",
+	ServiceTelnet: "telnet",
 }
 
 var serviceLabels = map[ServiceType]string{
-	ServiceSSH:   "SSH",
-	ServiceHTTP:  "HTTP",
-	ServiceFTP:   "FTP",
-	ServiceSMB:   "SMB",
-	ServiceMySQL: "MySQL",
-	ServiceRedis: "Redis",
+	ServiceSSH:    "SSH",
+	ServiceHTTP:   "HTTP",
+	ServiceFTP:    "FTP",
+	ServiceSMB:    "SMB",
+	ServiceMySQL:  "MySQL",
+	ServiceRedis:  "Redis",
+	ServiceTelnet: "Telnet",
 }
 
 func (s ServiceType) String() string {

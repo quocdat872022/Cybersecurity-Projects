@@ -31,6 +31,7 @@ type Config struct {
 	SMB      SMBConfig      `yaml:"smb"`
 	MySQL    MySQLConfig    `yaml:"mysql"`
 	Redis    RedisConfig    `yaml:"redis"`
+	Telnet   TelnetConfig   `yaml:"telnet"`
 	Database DatabaseConfig `yaml:"database"`
 	Stream   StreamConfig   `yaml:"stream"`
 	API      APIConfig      `yaml:"api"`
@@ -82,6 +83,13 @@ type RedisConfig struct {
 	Enabled       bool   `yaml:"enabled"`
 	Port          int    `yaml:"port"`
 	ServerVersion string `yaml:"server_version"`
+}
+
+type TelnetConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	Port     int    `yaml:"port"`
+	Banner   string `yaml:"banner"`
+	Hostname string `yaml:"hostname"`
 }
 
 type DatabaseConfig struct {
@@ -160,6 +168,12 @@ func Default() *Config {
 			Enabled:       true,
 			Port:          DefaultRedisPort,
 			ServerVersion: RedisBanner,
+		},
+		Telnet: TelnetConfig{
+			Enabled:  true,
+			Port:     DefaultTelnetPort,
+			Banner:   TelnetBanner,
+			Hostname: DefaultHostname,
 		},
 		Database: DatabaseConfig{
 			DSN:            "postgres://hive:hive@localhost:53743/hive?sslmode=disable",
@@ -250,6 +264,8 @@ func applyEnvOverrides(cfg *Config) {
 	applyPortOverride("HIVE_SMB_PORT", &cfg.SMB.Port)
 	applyPortOverride("HIVE_MYSQL_PORT", &cfg.MySQL.Port)
 	applyPortOverride("HIVE_REDIS_PORT", &cfg.Redis.Port)
+	applyPortOverride("HIVE_TELNET_PORT", &cfg.Telnet.Port)
+	applyBoolOverride("HIVE_TELNET_ENABLED", &cfg.Telnet.Enabled)
 	applyPortOverride("HIVE_API_PORT", &cfg.API.Port)
 
 	applyBoolOverride("HIVE_SSH_ENABLED", &cfg.SSH.Enabled)

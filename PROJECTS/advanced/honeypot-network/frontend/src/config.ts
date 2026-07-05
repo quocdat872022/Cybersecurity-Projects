@@ -126,6 +126,7 @@ export const SERVICE_LABELS: Record<string, string> = {
   smb: 'SMB',
   mysql: 'MySQL',
   redis: 'Redis',
+  telnet: 'Telnet',
 }
 
 export const BLOCKLIST_FORMATS = ['plain', 'iptables', 'nginx', 'csv'] as const

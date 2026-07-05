@@ -612,6 +612,9 @@ func (s *Server) handleSensors(
 	if s.cfg.Redis.Enabled {
 		services = append(services, "redis")
 	}
+	if s.cfg.Telnet.Enabled {
+		services = append(services, "telnet")
+	}
 
 	sensor := sensorInfo{
 		ID:        s.cfg.Sensor.ID,

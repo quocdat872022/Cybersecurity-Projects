@@ -21,22 +21,24 @@ const (
 )
 
 const (
-	DefaultSSHPort   = 2222
-	DefaultHTTPPort  = 8080
-	DefaultFTPPort   = 2121
-	DefaultSMBPort   = 4450
-	DefaultMySQLPort = 3307
-	DefaultRedisPort = 6380
-	DefaultAPIPort   = 8000
+	DefaultSSHPort    = 2222
+	DefaultHTTPPort   = 8080
+	DefaultFTPPort    = 2121
+	DefaultSMBPort    = 4450
+	DefaultMySQLPort  = 3307
+	DefaultRedisPort  = 6380
+	DefaultTelnetPort = 2333
+	DefaultAPIPort    = 8000
 )
 
 const (
-	SSHBanner   = "SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5"
-	HTTPServer  = "Apache/2.4.57 (Ubuntu)"
-	FTPBanner   = "220 ProFTPD 1.3.8b Server ready."
-	MySQLBanner = "5.7.42-0ubuntu0.18.04.1"
-	RedisBanner = "7.0.11"
-	SMBDialect  = "SMB 2.1"
+	SSHBanner    = "SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5"
+	HTTPServer   = "Apache/2.4.57 (Ubuntu)"
+	FTPBanner    = "220 ProFTPD 1.3.8b Server ready."
+	MySQLBanner  = "5.7.42-0ubuntu0.18.04.1"
+	RedisBanner  = "7.0.11"
+	SMBDialect   = "SMB 2.1"
+	TelnetBanner = "Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-105-generic x86_64)"
 )
 
 const (
