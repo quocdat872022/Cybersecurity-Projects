@@ -22,6 +22,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/CarterPerez-dev/hive/internal/config"
 	"github.com/CarterPerez-dev/hive/internal/session"
 	"github.com/CarterPerez-dev/hive/internal/sshd"
 	"github.com/CarterPerez-dev/hive/pkg/types"
@@ -115,6 +116,13 @@ func (s *TelnetService) runShell(
 	username string,
 	recorder *session.Recorder,
 ) {
+
+	banner := fmt.Sprintf(
+		config.TelnetMOTDTemplate,
+	)
+
+	writeAndRecord(conn, recorder, []byte(banner))
+
 	fs := sshd.NewFakeFS(s.cfg.Telnet.Hostname)
 	cmdCtx := &sshd.CommandContext{
 		FS:       fs,

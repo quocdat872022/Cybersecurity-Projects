@@ -58,6 +58,26 @@ const SSHMOTDTemplate = "Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-105-gen
 	"  Swap usage:   0%%\r\n\r\n" +
 	"Last login: %s from 10.0.2.2\r\n"
 
+const TelnetMOTDTemplate = "Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 6.8.0-111-generic x86_64)\r\n\r\n" +
+	" * Documentation:  https://help.ubuntu.com\r\n" +
+	" * Management:     https://landscape.canonical.com\r\n" +
+	" * Support:        https://ubuntu.com/advantage\r\n\r\n" +
+	"  Expanded Security Maintenance for Applications is not enabled.\r\n\r\n" +
+	"  132 updates can be applied immediately.\r\n" +
+	"  1 of these updates is a standard security update.\r\n" +
+	"  To see these additional updates run: apt list --upgradable\r\n\r\n" +
+
+	"  5 additional security updates can be applied with ESM Apps.\r\n" +
+	"  Learn more about enabling ESM Apps service at https://ubuntu.com/esm \r\n\r\n" +
+
+	"  *** System restart required *** \r\n\r\n" +
+
+	" The programs included with the Ubuntu system are free software; \r\n" +
+	" the exact distribution terms for each program are described in the \r\n" +
+	" individual files in /usr/share/doc/*/copyright.\r\n\r\n" +
+	" Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by \r\n" +
+	" applicable law.\r\n"
+
 const SchemaVersion = 1
 
 const (
