@@ -45,6 +45,7 @@ class Finding:
     redacted_snippet: str = ""
     compliance_frameworks: list[str] = field(default_factory = list)
     remediation: str = ""
+    column_signal: str | None = None
     detected_at: datetime = field(
         default_factory = lambda: datetime.now(UTC)
     )
