@@ -1,0 +1,60 @@
+// ===================
+// © AngelaMos | 2026
+// ChallengeCard.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-4;
+  background: $color-bg;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color $duration-fast $ease,
+    transform $duration-fast $ease;
+
+  &:hover {
+    border-color: $color-gray-400;
+    transform: translateY(-2px);
+  }
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.module {
+  font-size: $font-size-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $color-text-muted;
+}
+
+.solved {
+  padding: $space-1 $space-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-900;
+  background: $color-gray-200;
+  border-radius: $radius-full;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
+.id {
+  font-family: $font-mono;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}

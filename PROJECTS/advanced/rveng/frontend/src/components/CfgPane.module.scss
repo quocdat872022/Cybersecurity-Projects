@@ -1,0 +1,95 @@
+// ===================
+// © AngelaMos | 2026
+// CfgPane.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.cfg {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.summary {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-3 $space-4;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-left: 3px solid $color-gray-700;
+  border-radius: $radius-sm;
+}
+
+.blockHead {
+  display: flex;
+  align-items: baseline;
+  gap: $space-3;
+}
+
+.blockName {
+  font-weight: $font-weight-semibold;
+}
+
+.blockRange {
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.blockBody {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.edgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.edge {
+  padding: $space-1 $space-2;
+  font-family: $font-mono;
+  font-size: $font-size-xs;
+  border: 1px solid $color-border;
+  border-radius: $radius-full;
+  color: $color-text;
+}
+
+.taken {
+  border-color: $color-gray-600;
+  background: $color-gray-100;
+}
+
+.fallthrough {
+  color: $color-text-muted;
+}
+
+.jump {
+  border-color: $color-gray-500;
+}
+
+.terminal {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.state {
+  padding: $space-4;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+}

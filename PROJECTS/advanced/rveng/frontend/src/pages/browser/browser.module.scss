@@ -1,0 +1,44 @@
+// ===================
+// © AngelaMos | 2026
+// browser.module.scss
+// ===================
+
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+  max-width: $breakpoint-xl;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+}
+
+.subtitle {
+  color: $color-text-muted;
+}
+
+.progress {
+  max-width: 24rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: $space-4;
+}
+
+.state {
+  color: $color-text-muted;
+}

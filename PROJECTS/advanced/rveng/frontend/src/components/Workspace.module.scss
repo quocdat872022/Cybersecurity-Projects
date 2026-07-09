@@ -1,0 +1,104 @@
+// ===================
+// © AngelaMos | 2026
+// Workspace.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/mixins' as *;
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(20rem, 24rem) 1fr;
+  gap: $space-6;
+  align-items: start;
+
+  @include breakpoint-down('lg') {
+    grid-template-columns: 1fr;
+  }
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  position: sticky;
+  top: $space-4;
+
+  @include breakpoint-down('lg') {
+    position: static;
+  }
+}
+
+.runnerCard {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-5;
+  background: $color-bg;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+}
+
+.runnerTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+}
+
+.analysis {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  min-width: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: $space-1;
+  border-bottom: 1px solid $color-border;
+}
+
+.tab {
+  padding: $space-2 $space-4;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-text;
+  }
+}
+
+.activeTab {
+  color: $color-text;
+  font-weight: $font-weight-medium;
+  border-bottom-color: $color-gray-900;
+}
+
+.picker {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+
+  select {
+    padding: $space-1 $space-2;
+    font-size: $font-size-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-bg;
+  }
+}
+
+.pane {
+  min-width: 0;
+}
+
+.state {
+  padding: $space-6;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+}
