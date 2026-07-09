@@ -7,14 +7,18 @@ Pydantic schemas for authentication endpoints
 Defines request and response models for registration, login, and
 self-service profile updates. USERNAME_MIN and USERNAME_MAX are
 imported from the User model so validation constraints stay in
-sync with the database layer.
+sync with the database layer. PasswordStrengthInfo is attached to
+TokenResponse as optional, informational feedback from registration
+and never affects whether a password is accepted.
 
 Key exports:
   RegisterRequest, LoginRequest, UpdateProfileRequest - request schemas
   TokenResponse, UserResponse, UpdateProfileResponse - response schemas
+  PasswordStrengthInfo - informational password strength assessment
 
 Connects to:
   models/User.py - imports USERNAME_MIN, USERNAME_MAX
+  core/auth.py - imports check_password_strength for populating PasswordStrengthInfo
   controllers/auth_ctrl.py, controllers/admin_ctrl.py - instantiates response schemas
   routes/auth.py - passed to S()
 """
@@ -47,12 +51,27 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class PasswordStrengthInfo(BaseModel):
+    """
+    Informational password strength assessment
+
+    Never gates registration or login; the password_min length
+    constraint above is the only hard requirement. This is purely
+    feedback for the client to display to the user.
+    """
+    strength: str
+    score: int
+    entropy_bits: float
+    feedback: list[str] = Field(default_factory = list)
+
+
 class TokenResponse(BaseModel):
     """
     JWT token returned after login or registration
     """
     access_token: str
     token_type: str = "bearer"
+    password_strength: PasswordStrengthInfo | None = None
 
 
 class UpdateProfileRequest(BaseModel):
@@ -87,3 +106,4 @@ class UpdateProfileResponse(BaseModel):
     user: UserResponse
     access_token: str | None = None
     token_type: str = "bearer"
+    password_strength: PasswordStrengthInfo | None = None

@@ -7,15 +7,19 @@ Business logic for authentication operations
 Handles user registration with uniqueness checks, timing-safe login
 with Argon2 param rehashing on success, self-service profile updates
 confirmed by current password, and the /me identity endpoint.
+Registration and password changes attach an informational, non-blocking
+password strength assessment to the response.
 
 Key exports:
   register, login, update_profile, me
 
 Connects to:
-  core/auth.py - hash_password, verify_password, create_access_token
+  core/auth.py - hash_password, verify_password, create_access_token,
+    check_password_strength
   core/errors.py - raises ConflictError, AuthenticationError, ValidationError
   models/User.py - find_by_username, create_user, username_exists
-  schemas/auth.py - instantiates TokenResponse, UserResponse, UpdateProfileResponse
+  schemas/auth.py - instantiates TokenResponse, UserResponse, UpdateProfileResponse,
+    PasswordStrengthInfo
   routes/auth.py - called from route handlers
 """
 
@@ -28,10 +32,16 @@ from app.core.auth import (
     verify_password,
     verify_password_timing_safe,
     create_access_token,
+    check_password_strength,
 )
 from app.core.errors import ConflictError, AuthenticationError, ValidationError
 from app.models.User import User
-from app.schemas.auth import TokenResponse, UserResponse, UpdateProfileResponse
+from app.schemas.auth import (
+    TokenResponse,
+    UserResponse,
+    UpdateProfileResponse,
+    PasswordStrengthInfo,
+)
 
 
 def register() -> dict[str, Any]:
@@ -59,8 +69,12 @@ def register() -> dict[str, Any]:
             "role": user.role,
         },
     )
+
+    strength = check_password_strength(data.password)
+
     return TokenResponse(
         access_token = token,
+        password_strength = PasswordStrengthInfo(**strength),
     ).model_dump()
 
 
@@ -108,6 +122,7 @@ def update_profile() -> dict[str, Any]:
         raise AuthenticationError("Current password is incorrect")
 
     updates: dict[str, str] = {}
+    strength: dict[str, Any] | None = None
 
     if data.username is not None and data.username != user.username:
         if User.username_exists(data.username):
@@ -121,6 +136,7 @@ def update_profile() -> dict[str, Any]:
 
     if data.password is not None:
         updates["password_hash"] = hash_password(data.password)
+        strength = check_password_strength(data.password)
 
     if not updates:
         raise ValidationError("No fields to update")
@@ -146,6 +162,7 @@ def update_profile() -> dict[str, Any]:
             is_active = user.is_active,
         ),
         access_token = new_token,
+        password_strength = PasswordStrengthInfo(**strength) if strength else None,
     ).model_dump(exclude_none = True)
 
 
