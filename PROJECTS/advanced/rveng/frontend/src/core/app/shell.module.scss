@@ -1,0 +1,62 @@
+// ===================
+// © AngelaMos | 2026
+// shell.module.scss
+// ===================
+
+@use '../../styles/tokens' as *;
+@use '../../styles/fonts' as *;
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: $space-3;
+  padding: $space-4 $space-6;
+  border-bottom: 1px solid $color-border;
+  background: $color-bg;
+}
+
+.brand {
+  font-family: $font-mono;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  text-decoration: none;
+}
+
+.tag {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.content {
+  flex: 1;
+  padding: $space-6;
+}
+
+.loading {
+  padding: $space-8;
+  color: $color-text-muted;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-6;
+
+  pre {
+    padding: $space-3;
+    background: $color-gray-100;
+    border-radius: $radius-sm;
+    font-family: $font-mono;
+    font-size: $font-size-sm;
+    overflow-x: auto;
+  }
+}

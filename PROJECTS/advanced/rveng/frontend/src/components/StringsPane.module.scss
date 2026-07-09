@@ -1,0 +1,74 @@
+// ===================
+// © AngelaMos | 2026
+// StringsPane.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.strings {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+
+  input {
+    width: 12rem;
+  }
+}
+
+.count {
+  margin-left: auto;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.list {
+  max-height: 28rem;
+  overflow-y: auto;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: $space-4;
+  padding: $space-1 $space-3;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.offset {
+  color: $color-text-muted;
+}
+
+.text {
+  color: $color-text;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.state {
+  padding: $space-4;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+}

@@ -1,0 +1,13 @@
+"""
+©AngelaMos | 2026
+limits.py
+"""
+
+MAX_HEX_BYTES = 4096
+MAX_DISASM_BYTES = 65536
+MAX_ANSWER_LEN = 8192
+MAX_SESSION_LEN = 128
+MAX_BODY_BYTES = 65536
+DEFAULT_SESSION = "local"
+
+DEV_ORIGIN_REGEX = r"^http://(localhost|127\.0\.0\.1)(:\d+)?$"
