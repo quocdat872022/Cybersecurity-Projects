@@ -1,0 +1,7 @@
+{
+  "id": "03-flip-the-gate",
+  "module": "patching",
+  "title": "Flip the gate",
+  "mission": "The check at file offset 0x1154 is a conditional jump (jne, bytes 75 07) that skips the unlock path. Patch those two bytes so the branch is never taken and the unlock path always runs. Submit the two replacement bytes as hex.",
+  "answer": { "category": "patched_bytes", "offset": 4436, "patch": "9090" }
+}

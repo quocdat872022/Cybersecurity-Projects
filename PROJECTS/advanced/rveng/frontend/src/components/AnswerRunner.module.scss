@@ -1,0 +1,77 @@
+// ===================
+// © AngelaMos | 2026
+// AnswerRunner.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.runner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.hint {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.inputRow {
+  display: flex;
+  gap: $space-2;
+}
+
+.input {
+  flex: 1;
+  padding: $space-2 $space-3;
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+}
+
+.inputRow button {
+  padding: $space-2 $space-4;
+  font-weight: $font-weight-medium;
+  color: $color-white;
+  background: $color-gray-900;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.correct,
+.incorrect {
+  padding: $space-2 $space-3;
+  font-size: $font-size-sm;
+  border-radius: $radius-sm;
+}
+
+.correct {
+  color: $color-gray-900;
+  background: $color-gray-200;
+  border: 1px solid $color-gray-400;
+}
+
+.incorrect {
+  color: $color-gray-700;
+  background: $color-gray-100;
+  border: 1px solid $color-border;
+}
+
+.solvedNote {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}

@@ -1,0 +1,67 @@
+// ===================
+// © AngelaMos | 2026
+// SectionMap.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.wrap {
+  overflow-x: auto;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th,
+  td {
+    padding: $space-2 $space-3;
+    text-align: left;
+    border-bottom: 1px solid $color-border;
+  }
+
+  th {
+    font-weight: $font-weight-semibold;
+    color: $color-text-muted;
+    background: $color-surface;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.exec {
+  background: $color-gray-50;
+
+  .name {
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.name {
+  font-family: $font-mono;
+}
+
+.mono {
+  font-family: $font-mono;
+  color: $color-text-muted;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dim {
+  color: $color-text-muted;
+}
+
+.flags {
+  font-family: $font-mono;
+  letter-spacing: 0.1em;
+}

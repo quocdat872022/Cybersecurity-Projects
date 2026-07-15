@@ -1,0 +1,33 @@
+// ===================
+// © AngelaMos | 2026
+// ProgressBar.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.label {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.track {
+  height: 0.5rem;
+  background: $color-gray-200;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: $color-gray-700;
+  border-radius: $radius-full;
+  transition: width $duration-normal $ease;
+}
