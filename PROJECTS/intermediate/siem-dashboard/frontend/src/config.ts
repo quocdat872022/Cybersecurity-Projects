@@ -70,6 +70,10 @@ export const API_ENDPOINTS = {
     RESUME: (runId: string) => `/${API_VERSION}/scenarios/${runId}/resume`,
     SPEED: (runId: string) => `/${API_VERSION}/scenarios/${runId}/speed`,
   },
+  METRICS: {
+    SUMMARY: `/${API_VERSION}/metrics/summary`,
+    TIMELINE: `/${API_VERSION}/metrics/timeline`,
+  },
 } as const
 
 export const QUERY_KEYS = {
@@ -118,6 +122,13 @@ export const QUERY_KEYS = {
       [...QUERY_KEYS.ADMIN.ALL, 'users', { page, size }] as const,
     USER_BY_ID: (id: string) => [...QUERY_KEYS.ADMIN.ALL, 'user', id] as const,
   },
+  METRICS: {
+    ALL: ['metrics'] as const,
+    SUMMARY: (params: Record<string, unknown>) =>
+      [...QUERY_KEYS.METRICS.ALL, 'summary', params] as const,
+    TIMELINE: (params: Record<string, unknown>) =>
+      [...QUERY_KEYS.METRICS.ALL, 'timeline', params] as const,
+  },
 } as const
 
 export const ROUTES = {
@@ -131,6 +142,7 @@ export const ROUTES = {
   SCENARIOS: '/scenarios',
   SETTINGS: '/settings',
   ADMIN_USERS: '/admin/users',
+  METRICS: '/metrics',
 } as const
 
 export const STORAGE_KEYS = {

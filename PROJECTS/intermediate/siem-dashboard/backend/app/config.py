@@ -77,5 +77,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     DEBUG: bool = False
 
+    METRICS_P95_ALERT_MS: float = 2000.0
+    METRICS_SLOWDOWN_MULTIPLIER: float = 3.0
+
 
 settings = Settings()

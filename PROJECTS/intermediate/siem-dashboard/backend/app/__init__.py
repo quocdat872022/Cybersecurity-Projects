@@ -52,6 +52,9 @@ def create_app() -> Flask:
     from app.core.rate_limiting import init_limiter
     init_limiter(app)
 
+    from app.core.metrics import init_metrics
+    init_metrics(app)
+
     from app.routes import register_blueprints
     register_blueprints(app)
 

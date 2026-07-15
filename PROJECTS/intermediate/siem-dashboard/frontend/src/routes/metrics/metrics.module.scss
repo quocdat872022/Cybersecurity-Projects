@@ -1,0 +1,157 @@
+// ===================
+// ©AngelaMos | 2026
+// metrics.module.scss
+// ===================
+
+@use '@/styles' as *;
+
+.page {
+  @include flex-column;
+  gap: $space-6;
+  width: 100%;
+  max-width: 1325px;
+  margin: 0 auto;
+}
+
+.alertBanner {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3 $space-4;
+  background-color: $severity-critical-bg;
+  border: 1px solid $severity-critical;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $severity-critical;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+}
+
+.panel {
+  background-color: $bg-surface-100;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  padding: $space-5;
+}
+
+.title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-light;
+  margin-bottom: $space-4;
+}
+
+.chart {
+  width: 100%;
+  height: 280px;
+}
+
+.skeleton {
+  width: 100%;
+  height: 280px;
+  background-color: $bg-surface-200;
+  border-radius: $radius-sm;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-4;
+
+  @include breakpoint-down('md') {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background-color: $bg-surface-100;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  padding: $space-5;
+  @include flex-column;
+  gap: $space-3;
+  @include transition-fast;
+}
+
+.cardAlert {
+  border-color: $severity-critical;
+  background-color: $severity-critical-bg;
+}
+
+.cardHeader {
+  @include flex-between;
+}
+
+.endpoint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: $font-size-sm;
+  color: $text-default;
+  @include truncate;
+}
+
+.alertBadge {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-0-5 $space-2;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $severity-critical;
+  background-color: hsl(0 72% 51% / 20%);
+  flex-shrink: 0;
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.statRow {
+  display: flex;
+  gap: $space-6;
+}
+
+.stat {
+  @include flex-column;
+  gap: $space-1;
+}
+
+.statValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $text-default;
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $text-lighter;
+  text-transform: uppercase;
+  letter-spacing: $tracking-wide;
+}
+
+.baselineNote {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  padding-top: $space-2;
+  border-top: 1px solid $border-muted;
+}
+
+.empty {
+  text-align: center;
+  color: $text-muted;
+  padding: $space-8;
+  grid-column: 1 / -1;
+}
+
+.cardSkeleton {
+  height: 160px;
+  background-color: $bg-surface-100;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+}

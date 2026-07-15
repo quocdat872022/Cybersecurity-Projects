@@ -26,6 +26,7 @@ import {
   LuActivity,
   LuChevronLeft,
   LuChevronRight,
+  LuGauge,
   LuLayoutDashboard,
   LuLogOut,
   LuMenu,
@@ -47,6 +48,7 @@ const NAV_ITEMS = [
   { path: ROUTES.ALERTS, label: 'Alerts', icon: GiButterflyWarning },
   { path: ROUTES.RULES, label: 'Rules', icon: LuShield },
   { path: ROUTES.SCENARIOS, label: 'Scenarios', icon: LuPlay },
+  { path: ROUTES.METRICS, label: 'Metrics', icon: LuGauge },
 ] as const
 
 const BOTTOM_NAV_ITEMS = [

@@ -18,6 +18,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "gunicorn>=25.0.3",
     "requests",
+    "numpy>=2.0,<3.0",
 ]
 
 [project.optional-dependencies]
@@ -203,6 +204,9 @@ max-statements = 55
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
+]
+pythonpath = [
+    ".",
 ]
 addopts = "-ra -q"
 filterwarnings = [
