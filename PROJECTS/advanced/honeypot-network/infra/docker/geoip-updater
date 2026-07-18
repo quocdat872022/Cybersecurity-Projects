@@ -1,0 +1,11 @@
+# ©AngelaMos | 2026
+# geoip-updater
+
+FROM alpine:3.20
+
+RUN apk add --no-cache bash curl tar
+
+COPY infra/geoip/update.sh /update.sh
+RUN chmod +x /update.sh
+
+ENTRYPOINT ["/update.sh"]

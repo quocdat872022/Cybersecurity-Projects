@@ -111,10 +111,11 @@ const (
 )
 
 const (
-	DefaultReplayDir   = "/data/replays"
-	DefaultGeoIPPath   = "/usr/share/GeoIP/GeoLite2-City.mmdb"
-	DefaultHostKeyPath = "data/hostkey_ed25519"
-	DefaultConfigPath  = "config.yaml"
+	DefaultReplayDir    = "/data/replays"
+	DefaultGeoIPPath    = "/usr/share/GeoIP/GeoLite2-City.mmdb"
+	DefaultGeoIPASNPath = "/usr/share/GeoIP/GeoLite2-ASN.mmdb"
+	DefaultHostKeyPath  = "data/hostkey_ed25519"
+	DefaultConfigPath   = "config.yaml"
 )
 
 const (

@@ -95,7 +95,7 @@ func runServe(ctx context.Context) error {
 	}
 	defer func() { _ = redisStreamer.Close() }()
 
-	geoLookup, err := geo.NewLookup(cfg.GeoIP.DBPath)
+	geoLookup, err := geo.NewLookup(cfg.GeoIP.DBPath, cfg.GeoIP.ASNDBPath)
 	if err != nil {
 		return fmt.Errorf("loading geoip database: %w", err)
 	}

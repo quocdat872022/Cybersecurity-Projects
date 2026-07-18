@@ -30,6 +30,17 @@ services:
       timeout: 5s
       retries: 5
 
+  geoip-updater:
+    build:
+      context: .
+      dockerfile: infra/docker/geoip-updater
+    restart: "no"
+    environment:
+      GEOIP_ACCOUNT_ID: ${GEOIP_ACCOUNT_ID}
+      GEOIP_LICENSE_KEY: ${GEOIP_LICENSE_KEY}
+    volumes:
+      - geoipdata:/usr/share/GeoIP
+
   backend:
     build:
       context: .
@@ -40,6 +51,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      geoip-updater:
+        condition: service_completed_successfully
     environment:
       HIVE_DATABASE_URL: postgres://${POSTGRES_USER:-hive}:${POSTGRES_PASSWORD:-hive}@postgres:5432/${POSTGRES_DB:-hive}?sslmode=disable
       HIVE_REDIS_URL: redis://redis:6379
@@ -47,9 +60,11 @@ services:
       HIVE_SENSOR_REGION: ${HIVE_SENSOR_REGION:-local}
       HIVE_LOG_LEVEL: ${HIVE_LOG_LEVEL:-info}
       HIVE_GEOIP_DB_PATH: /usr/share/GeoIP/GeoLite2-City.mmdb
+      HIVE_GEOIP_ASN_DB_PATH: /usr/share/GeoIP/GeoLite2-ASN.mmdb
       HIVE_CORS_ORIGINS: ${HIVE_CORS_ORIGINS:-http://localhost,http://localhost:3000}
     ports:
       - "${HIVE_SSH_PORT:-2211}:2222"
+      - "${HIVE_TELNET_PORT:-2311}:2333"
       - "${HIVE_HTTP_PORT:-8055}:8080"
       - "${HIVE_FTP_PORT:-21272}:2121"
       - "${HIVE_SMB_PORT:-46353}:4450"

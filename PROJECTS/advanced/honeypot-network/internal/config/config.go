@@ -116,7 +116,8 @@ type APIConfig struct {
 }
 
 type GeoIPConfig struct {
-	DBPath string `yaml:"db_path"`
+	DBPath    string `yaml:"db_path"`
+	ASNDBPath string `yaml:"asn_db_path"`
 }
 
 type LogConfig struct {
@@ -198,7 +199,8 @@ func Default() *Config {
 			WriteTimeout: DefaultWriteTimeout,
 		},
 		GeoIP: GeoIPConfig{
-			DBPath: DefaultGeoIPPath,
+			DBPath:    DefaultGeoIPPath,
+			ASNDBPath: DefaultGeoIPASNPath,
 		},
 		Log: LogConfig{
 			Level:      "info",
@@ -247,6 +249,9 @@ func applyEnvOverrides(cfg *Config) {
 	}
 	if v := os.Getenv("HIVE_GEOIP_DB_PATH"); v != "" {
 		cfg.GeoIP.DBPath = v
+	}
+	if v := os.Getenv("HIVE_GEOIP_ASN_DB_PATH"); v != "" {
+		cfg.GeoIP.ASNDBPath = v
 	}
 	if v := os.Getenv("HIVE_LOG_LEVEL"); v != "" {
 		cfg.Log.Level = v
