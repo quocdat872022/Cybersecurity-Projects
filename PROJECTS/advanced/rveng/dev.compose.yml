@@ -1,0 +1,61 @@
+# ©AngelaMos | 2026
+# dev.compose.yml
+
+name: rveng-dev
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.dockerfile
+    container_name: rveng-api-dev
+    command: ["uv", "run", "--no-sync", "uvicorn", "rveng.api.server:app",
+      "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app/src"]
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - ./src:/app/src
+      - ./challenges:/app/challenges
+      - rveng_data_dev:/app/data
+    networks:
+      - app
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infra/docker/vite.dev
+    container_name: rveng-frontend-dev
+    environment:
+      - CI=true
+      - npm_config_store_dir=/pnpm-store
+    volumes:
+      - ./frontend:/app
+      - frontend_modules:/app/node_modules
+      - frontend_pnpm_store:/pnpm-store
+    networks:
+      - app
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: rveng-nginx-dev
+    ports:
+      - "${NGINX_HOST_PORT:-8791}:80"
+    volumes:
+      - ./infra/nginx/dev.nginx:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - app
+    restart: unless-stopped
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  rveng_data_dev:
+  frontend_modules:
+  frontend_pnpm_store:

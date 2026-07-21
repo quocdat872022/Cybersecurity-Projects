@@ -1,0 +1,25 @@
+[project]
+name = "rveng"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "CarterPerez-dev", email = "cartertechsolution@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "capstone>=5.0.9",
+    "fastapi>=0.139.0",
+    "pyelftools>=0.33",
+    "uvicorn>=0.50.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.2,<0.11.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+]
