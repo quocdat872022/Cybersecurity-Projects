@@ -5,6 +5,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -159,7 +160,7 @@ func Load(configPath string) (*Config, error) {
 		}
 
 		if err := k.Load(
-			env.Provider("", ".", envKeyReplacer),
+			env.ProviderWithValue("", ".", envCallback),
 			nil,
 		); err != nil {
 			loadErr = fmt.Errorf("load env vars: %w", err)
@@ -315,10 +316,14 @@ var envKeyMap = map[string]string{
 	"CANARY_BASE_URL":              "canary.base_url",
 	"PUBLIC_BASE_URL":              "canary.base_url",
 	"CANARY_MANAGE_URL":            "canary.manage_url",
+	"TRUSTED_PROXY_CIDRS":          "server.trusted_proxy_cidrs",
 	"TURNSTILE_SECRET_KEY":         "turnstile.secret_key",
+	"TURNSTILE_SECRET":             "turnstile.secret_key",
 	"TURNSTILE_SITE_KEY":           "turnstile.site_key",
 	"MYSQL_ENABLED":                "mysql.enabled",
+	"MYSQL_FAKE_ENABLED":           "mysql.enabled",
 	"MYSQL_ADDR":                   "mysql.addr",
+	"MYSQL_FAKE_ADDR":              "mysql.addr",
 	"MYSQL_PUBLIC_HOST":            "mysql.public_host",
 	"MYSQL_PUBLIC_PORT":            "mysql.public_port",
 	"RATE_LIMIT_CREATE_MIN_RATE":   "rate_limit.create_min_rate",
@@ -339,11 +344,36 @@ var envKeyMap = map[string]string{
 	"GEOLITE_PATH":                 "geoip.path",
 }
 
+var envSliceKeys = map[string]struct{}{
+	"server.trusted_proxy_cidrs": {},
+}
+
 func envKeyReplacer(s string) string {
 	if mapped, ok := envKeyMap[s]; ok {
 		return mapped
 	}
 	return ""
+}
+
+func envCallback(key, value string) (string, any) {
+	mapped := envKeyReplacer(key)
+	if mapped == "" {
+		return "", nil
+	}
+	if _, isSlice := envSliceKeys[mapped]; isSlice {
+		parts := strings.Split(value, ",")
+		out := make([]string, 0, len(parts))
+		for _, p := range parts {
+			if trimmed := strings.TrimSpace(p); trimmed != "" {
+				out = append(out, trimmed)
+			}
+		}
+		if len(out) == 0 {
+			return "", nil // blank/empty: leave the configured default intact
+		}
+		return mapped, out
+	}
+	return mapped, value
 }
 
 func validate(c *Config) error {
