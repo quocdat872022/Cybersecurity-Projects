@@ -412,6 +412,52 @@ class FileScanner:
                 return True
 
         return False
+    
+    def _is_allowlisted(
+            self,
+            path: Path,
+            base: Path,
+    ) -> bool:
+        """
+        Return True if the file's path matches any allowlist file_pattern.
+
+        Matching strategy (three passes, any match returns True):
+            1. Relative path from scan root  – catches subdir patterns like
+                "tests/fixtures/*_data.csv" or "tests/*"
+            2. Bare filename                 – catches simple patterns like
+                "test_*", "mock_*", "*_fixture*"
+            3. Each individual path component – catches directory-name patterns
+                like "fixtures" or "test_data" anywhere in the tree
+
+        This mirrors _is_excluded exactly so operators get the same
+        intuitive glob semantics for both features.
+
+        Fast-path: if no patterns are configured the method returns False
+        immediately (one attribute lookup + falsy check, no loop).
+        """
+        if not self._allowlist_patterns:
+            return False
+ 
+        relative      = str(path.relative_to(base))
+        relative_path = Path(relative)
+
+        for pattern in self._allowlist_patterns:
+            # Pass 1 – relative path (handles "tests/fixtures/sample.csv" or "tests/mock_users.csv" matched against "tests/fixtures/*")
+            if fnmatch.fnmatch(relative, pattern):
+                return True
+            # Pass 2 – bare filename (handles "test_data.txt", "mock_*.csv")
+            if fnmatch.fnmatch(path.name, pattern):
+                return True
+            # Pass 3 – any component of the RELATIVE path only. Using relative_path.parts (not path.parts) ensures we never match against the absolute scan-root directory or system paths above it.  This handles a sub-directory named "fixtures" or "mock_data" anywhere under the scan root.
+            if any(
+                fnmatch.fnmatch(part, pattern) for part in relative_path.parts
+            ):
+                return True
+        
+        return False
+
+
+         
 
 
 # ── Module-level helpers ─────────────────────────────────────────────────────
