@@ -1,0 +1,48 @@
+# ©AngelaMos | 2026
+# rules/examples/international_ids.yml
+#
+# Example custom rule file. Everything under `rules:` in every
+# *.yml/*.yaml file in this directory is loaded at startup by
+# DetectorRegistry (see detection.custom_rules_dir in
+# .dlp-scanner.yml). Copy this file, rename it, and edit freely --
+# a mistake in one rule only disables that rule, not the file.
+
+rules:
+  - id: CUSTOM_BR_CPF
+    name: "Brazilian CPF Number"
+    pattern: '\b\d{3}\.\d{3}\.\d{3}-\d{2}\b'
+    base_score: 0.40
+    context_keywords: ["cpf", "cadastro", "cpf/mf"]
+    compliance: ["LGPD"]
+    # mod11 here is the generic mod-11 checksum shipped with the
+    # scanner, not the real two-digit CPF algorithm. It still
+    # filters out an obviously-wrong final digit, which is enough
+    # to cut false positives on plain phone-number-shaped strings.
+    validator: "mod11"
+
+  - id: CUSTOM_IN_AADHAAR
+    name: "Indian Aadhaar Number"
+    pattern: '\b\d{4}\s\d{4}\s\d{4}\b'
+    base_score: 0.30
+    context_keywords: ["aadhaar", "aadhar", "uidai"]
+    compliance: ["DPDP"]
+    validator: "none"
+
+  - id: CUSTOM_BAD_VALIDATOR
+    name: "test"
+    pattern: 'abc'
+    validator: "does_not_exist"
+
+  # --- What gets rejected and why -------------------------------
+  #
+  # A pattern like the one below is rejected at load time because
+  # it has a quantified group nested inside another quantifier
+  # ((a+)+), which is the textbook shape for catastrophic
+  # backtracking. It never reaches the detector even if you
+  # uncomment it -- the loader logs custom_rule_pattern_nested_
+  # quantifier and skips the rule.
+  #
+  # - id: CUSTOM_BAD_REDOS_EXAMPLE
+  #   name: "Do not do this"
+  #   pattern: '([A-Za-z]+)+@'
+  #   base_score: 0.50

@@ -51,6 +51,11 @@ detection:
   enable_rules:
     - "*"
   disable_rules: []
+  # Directory of user-authored YAML rule files. Every *.yml/*.yaml
+  # file under this directory is scanned for a top-level "rules"
+  # list; see rules/README.md for the schema. Set to "" to disable
+  # custom rule loading. Rule ids must be prefixed CUSTOM_.
+  custom_rules_dir: "rules"
   allowlists:
     values:
       - "123-45-6789"

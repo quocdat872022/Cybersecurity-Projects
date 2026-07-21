@@ -1,6 +1,12 @@
 """
 ©AngelaMos | 2026
 db_scanner.py
+
+Challenge 5 change summary
+---------------------------
+``DatabaseScanner`` now stores ``config.compliance`` and forwards it as
+``compliance_config`` to every :func:`~dlp_scanner.scoring.match_to_finding`
+call in ``_append_findings``.  No detection logic is changed.
 """
 
 
@@ -11,12 +17,16 @@ from urllib.parse import urlparse
 
 import structlog
 
-from dlp_scanner.config import ScanConfig
+from dlp_scanner.config import ScanConfig, ComplianceConfig
 from dlp_scanner.constants import (
     TEXT_DB_COLUMN_TYPES_MYSQL,
     TEXT_DB_COLUMN_TYPES_PG,
 )
 from dlp_scanner.detectors.base import DetectorMatch
+from dlp_scanner.detectors.column_heuristics import (
+    COLUMN_NAME_BOOST,
+    matched_column_pattern,
+)
 from dlp_scanner.detectors.registry import DetectorRegistry
 from dlp_scanner.models import (
     Location,
@@ -57,6 +67,8 @@ class DatabaseScanner:
         self._detection_config = config.detection
         self._redaction_style = config.output.redaction_style
         self._registry = registry
+        # Challenge 5: store compliance config for severity override
+        self._compliance_config: ComplianceConfig = config.compliance
 
     def scan(self, target: str) -> ScanResult:
         """
@@ -504,7 +516,20 @@ class DatabaseScanner:
         column_name: str = "",
     ) -> None:
         """
-        Convert detector matches to findings and append
+        Convert detector matches to findings and append.
+
+        Challenge 5: passes ``compliance_config`` so the severity floor
+        policy is applied here too.
+
+        Challenge 6: 
+        Before thresholding, apply the column-name heuristic: if the
+        column this text came from has a name that strongly suggests a
+        particular kind of sensitive data (e.g. "ssn", "credit_card_num",
+        "patient_dob"), boost the confidence of matches for the
+        corresponding rule. This lets a schema signal push a borderline
+        content match over the reporting threshold, the same way
+        production DLP tools prioritize scanning using schema analysis
+        alongside content inspection
         """
         min_confidence = (self._detection_config.min_confidence)
 
@@ -516,15 +541,51 @@ class DatabaseScanner:
         )
 
         for match in matches:
+            scored_match = match
+            column_signal: str | None = None
+ 
+            if column_name:
+                pattern = matched_column_pattern(
+                    column_name,
+                    match.rule_id,
+                )
+                if pattern is not None:
+                    column_signal = (
+                        f"column name '{column_name}' matches "
+                        f"pattern '{pattern}' associated with "
+                        f"rule {match.rule_id}"
+                    )
+                    boosted_score = min(
+                        1.0,
+                        match.score + COLUMN_NAME_BOOST,
+                    )
+                    scored_match = DetectorMatch(
+                        rule_id = match.rule_id,
+                        rule_name = match.rule_name,
+                        start = match.start,
+                        end = match.end,
+                        matched_text = match.matched_text,
+                        score = boosted_score,
+                        context_keywords = match.context_keywords,
+                        compliance_frameworks = (
+                            match.compliance_frameworks
+                        ),
+                    )
+ 
             if match.score < min_confidence:
                 continue
 
             finding = match_to_finding(
-                match,
+                scored_match,
                 text,
                 location,
                 self._redaction_style,
+                compliance_config = self._compliance_config,
             )
+
+            if column_signal is not None:
+                finding.column_signal = column_signal
+                
             result.findings.append(finding)
 
 
