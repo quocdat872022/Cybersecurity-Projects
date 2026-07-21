@@ -25,7 +25,7 @@ services:
     ports:
       - "${POSTGRES_HOST_PORT:-16969}:5432"
     volumes:
-      - postgres_dev:/var/lib/postgresql/data
+      - postgres_dev:/var/lib/postgresql
     networks:
       - vigil_dev
     healthcheck:
@@ -72,6 +72,7 @@ services:
     ports:
       - "${BACKEND_HOST_PORT:-36969}:8000"
     volumes:
+      - ./backend:/app
       - model_data_dev:/app/data/models
       - nginx_logs_dev:/var/log/nginx
     depends_on:
@@ -95,6 +96,7 @@ services:
     container_name: vigil-frontend-dev
     environment:
       VITE_API_TARGET: http://backend:8000
+      CI: "true"
     ports:
       - "${FRONTEND_HOST_PORT:-46969}:5173"
     volumes:

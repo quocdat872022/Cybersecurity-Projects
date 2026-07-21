@@ -1,0 +1,39 @@
+// ===================
+// © AngelaMos | 2026
+// SourceReveal.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.reveal {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-4;
+  background: $color-gray-900;
+  border-radius: $radius-md;
+}
+
+.heading {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-50;
+}
+
+.note {
+  font-size: $font-size-sm;
+  color: $color-gray-400;
+}
+
+.code {
+  overflow-x: auto;
+  padding: $space-3;
+  background: $color-black;
+  border-radius: $radius-sm;
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+  color: $color-gray-100;
+  white-space: pre;
+}

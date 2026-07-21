@@ -1,0 +1,24 @@
+// ===================
+// © AngelaMos | 2026
+// workspace.module.scss
+// ===================
+
+@use '../../styles/tokens' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.back {
+  align-self: flex-start;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-text;
+    text-decoration: underline;
+  }
+}

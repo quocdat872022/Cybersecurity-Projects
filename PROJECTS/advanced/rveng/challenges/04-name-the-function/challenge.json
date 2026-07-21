@@ -1,0 +1,7 @@
+{
+  "id": "04-name-the-function",
+  "module": "strings-symbols",
+  "title": "Name the function",
+  "mission": "One function in this binary decides whether the gate opens. Read the symbol table and name it.",
+  "answer": { "category": "identified_symbol", "name": "check" }
+}

@@ -1,0 +1,7 @@
+{
+  "id": "05-find-the-gate",
+  "module": "disassembly",
+  "title": "Find the gate",
+  "mission": "This binary checks a number against a magic value. Disassemble the check function and find the constant it compares against. Answer in decimal or hex.",
+  "answer": { "category": "found_value", "expected": 1337 }
+}
