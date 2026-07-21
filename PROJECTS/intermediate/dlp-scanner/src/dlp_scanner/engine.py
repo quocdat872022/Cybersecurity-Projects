@@ -1,10 +1,6 @@
 """
 ©AngelaMos | 2026
 engine.py
-
-Challenge 4 change: ``scan_files`` now accepts a ``no_cache`` keyword
-argument that is forwarded to ``FileScanner``.  All other behaviour is
-unchanged.
 """
 
 
@@ -41,36 +37,32 @@ from dlp_scanner.scanners.network_scanner import (
 
 log = structlog.get_logger()
 
-REPORTER_MAP: dict[str, type] = {
-    "console": ConsoleReporter,
-    "json": JsonReporter,
-    "sarif": SarifReporter,
-    "csv": CsvReporter,
-    "html": HtmlReporter,
-}
+REPORTER_MAP: dict[str,
+                   type] = {
+                       "console": ConsoleReporter,
+                       "json": JsonReporter,
+                       "sarif": SarifReporter,
+                       "csv": CsvReporter,
+                       "html": HtmlReporter,
+                   }
 
 
 class ScanEngine:
     """
-    Orchestrates the full scan pipeline.
-
-    The :attr:`~dlp_scanner.config.ComplianceConfig.severity_overrides`
-    mapping read from the config is forwarded to every scanner so that
-    the severity floor is applied uniformly across file, database, and
-    network scans.
+    Orchestrates the full scan pipeline
     """
-
     def __init__(self, config: ScanConfig) -> None:
         self._config = config
         detection = config.detection
         allowlist_vals = detection.allowlists.values
         self._registry = DetectorRegistry(
-            enable_patterns=detection.enable_rules,
-            disable_patterns=detection.disable_rules,
-            allowlist_values=(
+            enable_patterns = detection.enable_rules,
+            disable_patterns = detection.disable_rules,
+            allowlist_values = (
                 frozenset(allowlist_vals) if allowlist_vals else None
             ),
-            context_window_tokens=(detection.context_window_tokens),
+            context_window_tokens = (detection.context_window_tokens),
+            custom_rules_dir = detection.custom_rules_dir or None,
         )
 
         # Log active severity overrides at startup so operators can confirm the policy is loaded correctly.
@@ -80,6 +72,11 @@ class ScanEngine:
                 "compliance_severity_overrides_loaded",
                 overrides = overrides,
             )
+        log.info(
+            "detector_registry_ready",
+            rule_count = self._registry.rule_count,
+            custom_rule_count = self._registry.custom_rule_count,
+        )
 
     def scan_files(
         self,
@@ -107,38 +104,37 @@ class ScanEngine:
         result = scanner.scan(target)
         log.info(
             "file_scan_complete",
-            target=target,
-            findings=len(result.findings),
-            targets=result.targets_scanned,
-            no_cache=no_cache,
+            target = target,
+            findings = len(result.findings),
+            targets = result.targets_scanned,
         )
         return result
 
     def scan_database(self, target: str) -> ScanResult:
         """
-        Scan database target for sensitive data.
+        Scan database target for sensitive data
         """
         scanner = DatabaseScanner(self._config, self._registry)
         result = scanner.scan(target)
         log.info(
             "database_scan_complete",
-            target=target,
-            findings=len(result.findings),
-            targets=result.targets_scanned,
+            target = target,
+            findings = len(result.findings),
+            targets = result.targets_scanned,
         )
         return result
 
     def scan_network(self, target: str) -> ScanResult:
         """
-        Scan network capture file for sensitive data.
+        Scan network capture file for sensitive data
         """
         scanner = NetworkScanner(self._config, self._registry)
         result = scanner.scan(target)
         log.info(
             "network_scan_complete",
-            target=target,
-            findings=len(result.findings),
-            targets=result.targets_scanned,
+            target = target,
+            findings = len(result.findings),
+            targets = result.targets_scanned,
         )
         return result
 
@@ -148,7 +144,7 @@ class ScanEngine:
         output_format: OutputFormat | None = None,
     ) -> str:
         """
-        Generate report string in the requested format.
+        Generate report string in the requested format
         """
         fmt = output_format or self._config.output.format
         reporter_cls = REPORTER_MAP[fmt]
@@ -161,7 +157,7 @@ class ScanEngine:
         result: ScanResult,
     ) -> None:
         """
-        Display Rich-formatted results to console.
+        Display Rich-formatted results to console
         """
         reporter = ConsoleReporter()
         reporter.display(result)
@@ -173,13 +169,13 @@ class ScanEngine:
         output_format: OutputFormat | None = None,
     ) -> None:
         """
-        Generate report and write to file.
+        Generate report and write to file
         """
         content = self.generate_report(result, output_format)
         with open(output_path, "w") as f:
             f.write(content)
         log.info(
             "report_written",
-            path=output_path,
-            format=output_format or self._config.output.format,
+            path = output_path,
+            format = output_format or self._config.output.format,
         )

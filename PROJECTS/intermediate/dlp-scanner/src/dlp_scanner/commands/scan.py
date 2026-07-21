@@ -197,7 +197,7 @@ def _run_scan(
     engine = ScanEngine(config)
 
     if scan_type == "file":
-        result = engine.scan_files(target, no_cache=no_cache)
+        result = engine.scan_files(target)
     elif scan_type == "db":
         result = engine.scan_database(target)
     else:

@@ -5,6 +5,7 @@ registry.py
 
 
 import fnmatch
+from pathlib import Path
 
 from dlp_scanner.detectors.base import (
     DetectionRule,
@@ -18,6 +19,7 @@ from dlp_scanner.detectors.pattern import PatternDetector
 from dlp_scanner.detectors.rules.credentials import (
     CREDENTIAL_RULES,
 )
+from dlp_scanner.detectors.rules.custom import load_custom_rules
 from dlp_scanner.detectors.rules.financial import (
     FINANCIAL_RULES,
 )
@@ -35,10 +37,18 @@ ALL_RULES: list[DetectionRule] = [
     *HEALTH_RULES,
 ]
 
+BUILTIN_RULE_IDS: frozenset[str] = frozenset(r.rule_id for r in ALL_RULES)
+
 
 class DetectorRegistry:
     """
     Central registry that loads, filters, and runs all detectors
+
+    Rules come from two sources: the built-in Python rule modules
+    (ALL_RULES) and, optionally, user-authored YAML rules loaded
+    from `custom_rules_dir`. Custom rules are namespaced under
+    CUSTOM_ and can never override a built-in rule id -- see
+    detectors/rules/custom.py for the full safety model.
     """
     def __init__(
         self,
@@ -48,9 +58,19 @@ class DetectorRegistry:
         context_window_tokens: int = 10,
         entropy_threshold: float = 7.2,
         enable_entropy: bool = True,
+        custom_rules_dir: str | Path | None = None,
     ) -> None:
+        custom_rules: list[DetectionRule] = []
+        if custom_rules_dir:
+            custom_rules = load_custom_rules(
+                custom_rules_dir,
+                builtin_rule_ids = BUILTIN_RULE_IDS,
+            )
+
+        combined_rules = [*ALL_RULES, *custom_rules]
+
         active_rules = _filter_rules(
-            ALL_RULES,
+            combined_rules,
             enable_patterns or ["*"],
             disable_patterns or [],
         )
@@ -64,6 +84,7 @@ class DetectorRegistry:
             if enable_entropy else None
         )
         self._context_window = context_window_tokens
+        self._custom_rule_count = len(custom_rules)
 
     def detect(self, text: str) -> list[DetectorMatch]:
         """
@@ -88,6 +109,13 @@ class DetectorRegistry:
         Return the number of active pattern rules
         """
         return len(self._pattern_detector._rules)
+
+    @property
+    def custom_rule_count(self) -> int:
+        """
+        Return the number of successfully loaded custom rules
+        """
+        return self._custom_rule_count
 
 
 def _filter_rules(

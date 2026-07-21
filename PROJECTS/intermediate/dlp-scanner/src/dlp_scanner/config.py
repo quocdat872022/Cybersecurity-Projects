@@ -82,6 +82,11 @@ class DetectionConfig(BaseModel):
     enable_rules: list[str] = Field(default_factory = lambda: ["*"])
     disable_rules: list[str] = Field(default_factory = list)
     allowlists: AllowlistConfig = Field(default_factory = AllowlistConfig)
+    # Directory of user-authored YAML rule files (see rules/README.md).
+    # Empty string disables custom rule loading entirely. Rule ids in
+    # this directory must be prefixed CUSTOM_ and can never override
+    # a built-in rule -- see detectors/rules/custom.py.
+    custom_rules_dir: str = ""
 
 
 class ComplianceConfig(BaseModel):

@@ -51,6 +51,11 @@ detection:
   enable_rules:
     - "*"
   disable_rules: []
+  # Directory of user-authored YAML rule files. Every *.yml/*.yaml
+  # file under this directory is scanned for a top-level "rules"
+  # list; see rules/README.md for the schema. Set to "" to disable
+  # custom rule loading. Rule ids must be prefixed CUSTOM_.
+  custom_rules_dir: "rules"
   allowlists:
     values:
       - "123-45-6789"
@@ -72,33 +77,7 @@ compliance:
     - "CCPA"
     - "SOX"
     - "GLBA"
-  # severity_overrides — policy-driven severity floors (Challenge 5)
-  #
-  # Maps a compliance framework name to a minimum severity level.  Any
-  # finding whose compliance_frameworks list contains the named framework
-  # is elevated to *at least* the specified severity, regardless of the
-  # confidence score.
-  #
-  # Why this matters:
-  #   PCI-DSS has no concept of "low severity" plaintext card data — any
-  #   unencrypted PAN is a blocking finding.  HIPAA treats any PHI
-  #   exposure as at least medium priority.  These floors let compliance
-  #   teams encode regulatory requirements directly in the config rather
-  #   than post-processing reports.
-  #
-  # Mechanics:
-  #   The confidence score is never changed.  Only the severity label is
-  #   elevated.  If a Visa card number scores 0.35 (normally "low"), it
-  #   will appear in the report as "high" severity because PCI_DSS:high
-  #   is configured — but the 35 % confidence figure is preserved so
-  #   analysts can see it was a lower-confidence match.
-  #
-  # Valid severity values: "critical", "high", "medium", "low"
-  #
-  severity_overrides:
-    PCI_DSS: "high"    # unencrypted PANs are always at least high
-    HIPAA: "medium"    # PHI findings are always at least medium
-    
+
 output:
   format: "console"
   output_file: ""
