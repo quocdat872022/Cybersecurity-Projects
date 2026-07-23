@@ -90,6 +90,10 @@ dev-keygen:
 dev-version:
     go run ./cmd/hive version
 
+[group('dev')]
+geoip-update:
+    GEOIP_DEST=data/geoip bash infra/geoip/update.sh
+    
 # =============================================================================
 # Build (Production)
 # =============================================================================
