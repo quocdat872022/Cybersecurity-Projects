@@ -35,6 +35,7 @@ const (
 	maxPageLimit         = 500
 	defaultStatsDuration = 24 * time.Hour
 	defaultCredentialTop = 20
+	defaultTrendingTop   = 10
 	defaultAttackerTop   = 50
 	corsMaxAgeSeconds    = "86400"
 	wsEventBuffer        = 256
@@ -127,6 +128,10 @@ func (s *Server) buildRouter() *chi.Mux {
 			r.Get(
 				"/credentials",
 				s.handleStatsCredentials,
+			)
+			r.Get(
+				"/credentials/trending",
+				s.handleStatsCredentialsTrending,
 			)
 		})
 

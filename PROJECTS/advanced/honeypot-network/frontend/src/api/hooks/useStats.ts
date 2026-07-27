@@ -5,7 +5,7 @@
 
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useQuery } from '@tanstack/react-query'
-import type { ApiResponse, CredentialStats, OverviewStats } from '@/api/types'
+import type { ApiResponse, CredentialStats, OverviewStats, TrendingCredential} from '@/api/types'
 import { API_ENDPOINTS, QUERY_KEYS } from '@/config'
 import { apiClient, QUERY_STRATEGIES } from '@/core/api'
 
@@ -14,6 +14,7 @@ export const statsQueries = {
   overview: (since: string) => QUERY_KEYS.STATS.OVERVIEW(since),
   countries: (since: string) => QUERY_KEYS.STATS.COUNTRIES(since),
   credentials: () => QUERY_KEYS.STATS.CREDENTIALS(),
+  trendingCredentials: () => QUERY_KEYS.STATS.CREDENTIALS_TRENDING(),
 } as const
 
 export const useStatsOverview = (
@@ -58,5 +59,18 @@ export const useStatsCredentials = (): UseQueryResult<CredentialStats, Error> =>
       return response.data.data
     },
     ...QUERY_STRATEGIES.slow,
+  })
+}
+
+export const useTrendingCredentials = (): UseQueryResult<TrendingCredential[], Error> => {
+  return useQuery({
+    queryKey: statsQueries.trendingCredentials(),
+    queryFn: async () => {
+      const response = await apiClient.get<ApiResponse<TrendingCredential[]>>(
+        API_ENDPOINTS.STATS.CREDENTIALS_TRENDING
+      )
+      return response.data.data
+    },
+    ...QUERY_STRATEGIES.live,
   })
 }

@@ -41,3 +41,19 @@ export const isValidCredentialStats = (
 ): data is CredentialStats => {
   return credentialStatsSchema.safeParse(data).success
 }
+
+export const trendingCredentialSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+  recent_count: z.number(),
+  prior_count: z.number(),
+  growth_ratio: z.number(),
+})
+
+export type TrendingCredential = z.infer<typeof trendingCredentialSchema>
+
+export const isValidTrendingCredential = (
+  data: unknown
+): data is TrendingCredential => {
+  return trendingCredentialSchema.safeParse(data).success
+}

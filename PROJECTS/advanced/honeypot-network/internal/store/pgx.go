@@ -671,6 +671,62 @@ func (s *PgxStore) TopPairs(
 	return results, rows.Err()
 }
 
+func (s *PgxStore) TrendingCredentials(
+	ctx context.Context, limit int,
+) ([]TrendingCredential, error) {
+	rows, err := s.pool.Query(ctx, `
+		WITH windows AS (
+			SELECT
+				username,
+				password,
+				COUNT(*) FILTER (
+					WHERE timestamp >= NOW() - INTERVAL '6 hours'
+				) AS recent_count,
+				COUNT(*) FILTER (
+					WHERE timestamp >= NOW() - INTERVAL '12 hours'
+					AND timestamp < NOW() - INTERVAL '6 hours'
+				) AS prior_count
+			FROM credentials
+			WHERE timestamp >= NOW() - INTERVAL '24 hours'
+			GROUP BY username, password
+		)
+		SELECT
+			username,
+			password,
+			recent_count,
+			prior_count,
+			CASE
+				WHEN prior_count = 0 THEN recent_count::float8
+				ELSE recent_count::float8 / prior_count::float8
+			END AS growth_ratio
+		FROM windows
+		WHERE recent_count > 0
+		ORDER BY growth_ratio DESC, recent_count DESC
+		LIMIT $1`,
+		limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"querying trending credentials: %w", err,
+		)
+	}
+	defer rows.Close()
+
+	var results []TrendingCredential
+	for rows.Next() {
+		var tc TrendingCredential
+		if err := rows.Scan(
+			&tc.Username, &tc.Password,
+			&tc.RecentCount, &tc.PriorCount,
+			&tc.GrowthRatio,
+		); err != nil {
+			return nil, fmt.Errorf("scanning row: %w", err)
+		}
+		results = append(results, tc)
+	}
+	return results, rows.Err()
+}
+
 func (s *PgxStore) UpsertIOC(
 	ctx context.Context, ioc *types.IOC,
 ) error {

@@ -55,6 +55,14 @@ type credentialStats struct {
 	TopPairs     []credentialPair  `json:"top_pairs"`
 }
 
+type trendingCredentialEntry struct {
+	Username    string  `json:"username"`
+	Password    string  `json:"password"`
+	RecentCount int64   `json:"recent_count"`
+	PriorCount  int64   `json:"prior_count"`
+	GrowthRatio float64 `json:"growth_ratio"`
+}
+
 type credentialEntry struct {
 	Value string `json:"value"`
 	Count int64  `json:"count"`
@@ -245,6 +253,40 @@ func (s *Server) handleStatsCredentials(
 			TopPasswords: topP,
 			TopPairs:     topPairs,
 		},
+	})
+}
+
+func (s *Server) handleStatsCredentialsTrending(
+	w http.ResponseWriter, r *http.Request,
+) {
+	ctx := r.Context()
+
+	trending, err := s.store.TrendingCredentials(
+		ctx, defaultTrendingTop,
+	)
+	if err != nil {
+		s.writeError(
+			w, http.StatusInternalServerError,
+			"failed to query trending credentials",
+		)
+		return
+	}
+
+	entries := make(
+		[]trendingCredentialEntry, len(trending),
+	)
+	for i, t := range trending {
+		entries[i] = trendingCredentialEntry{
+			Username:    t.Username,
+			Password:    t.Password,
+			RecentCount: t.RecentCount,
+			PriorCount:  t.PriorCount,
+			GrowthRatio: t.GrowthRatio,
+		}
+	}
+
+	s.writeJSON(w, http.StatusOK, apiResponse{
+		Data: entries,
 	})
 }
 
