@@ -1,7 +1,10 @@
 repos:
   # Python Ruff Checks
+  # This rev is the single source of truth for the ruff version.
+  # .github/workflows/lint.yml reads it from this file so CI and the
+  # local hook can never lint with two different rule sets.
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.1
+    rev: v0.16.1
     hooks:
       # Beginner projects
       - id: ruff
