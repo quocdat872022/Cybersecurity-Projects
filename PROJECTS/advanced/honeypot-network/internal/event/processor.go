@@ -16,13 +16,13 @@ package event
 import (
 	"context"
 	"encoding/json"
-	"net"
 	"time"
 
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/CarterPerez-dev/hive/internal/config"
+	"github.com/CarterPerez-dev/hive/internal/intel"
 	"github.com/CarterPerez-dev/hive/pkg/types"
 )
 
@@ -47,14 +47,15 @@ type EventStreamer interface {
 }
 
 type Processor struct {
-	workers  int
-	bus      *Bus
-	store    DataStore
-	streamer EventStreamer
-	geo      GeoResolver
-	detector TechniqueDetector
-	logger   zerolog.Logger
-	eventCh  <-chan *types.Event
+	workers   int
+	bus       *Bus
+	store     DataStore
+	streamer  EventStreamer
+	geo       GeoResolver
+	detector  TechniqueDetector
+	extractor *intel.Extractor
+	logger    zerolog.Logger
+	eventCh   <-chan *types.Event
 }
 
 func NewProcessor(
@@ -72,14 +73,15 @@ func NewProcessor(
 	)
 
 	return &Processor{
-		workers:  workers,
-		bus:      bus,
-		store:    store,
-		streamer: streamer,
-		geo:      geo,
-		detector: detector,
-		logger:   logger,
-		eventCh:  ch,
+		workers:   workers,
+		bus:       bus,
+		store:     store,
+		streamer:  streamer,
+		geo:       geo,
+		detector:  detector,
+		extractor: intel.NewExtractor(),
+		logger:    logger,
+		eventCh:   ch,
 	}
 }
 
@@ -197,12 +199,24 @@ func (p *Processor) persist(
 			Msg("failed to upsert attacker")
 	}
 
-	if ioc := ipIOC(ev); ioc != nil {
+	p.persistIOCs(ctx, ev)
+}
+
+func (p *Processor) persistIOCs(
+	ctx context.Context, ev *types.Event,
+) {
+	if p.extractor == nil {
+		return
+	}
+
+	iocs := p.extractor.Extract(ev)
+	for _, ioc := range iocs {
 		if err := p.store.UpsertIOC(ctx, ioc); err != nil {
 			p.logger.Error().
 				Err(err).
-				Str("ip", ev.SourceIP).
-				Msg("failed to upsert ip ioc")
+				Str("ioc_type", ioc.Type.String()).
+				Str("ioc_value", ioc.Value).
+				Msg("failed to upsert ioc")
 		}
 	}
 }
@@ -257,35 +271,4 @@ func buildAttacker(ev *types.Event) *types.Attacker {
 		a.Geo = *ev.Geo
 	}
 	return a
-}
-
-func ipIOC(ev *types.Event) *types.IOC {
-	ip := ev.SourceIP
-	if ip == "" {
-		return nil
-	}
-
-	parsed := net.ParseIP(ip)
-	if parsed == nil {
-		return nil
-	}
-
-	if parsed.IsLoopback() || parsed.IsPrivate() {
-		return nil
-	}
-
-	iocType := types.IOCIPv4
-	if parsed.To4() == nil {
-		iocType = types.IOCIPv6
-	}
-
-	return &types.IOC{
-		Type:       iocType,
-		Value:      ip,
-		FirstSeen:  ev.Timestamp,
-		LastSeen:   ev.Timestamp,
-		SightCount: 1,
-		Confidence: 50,
-		Source:     ev.ServiceType.String() + "-honeypot",
-	}
 }
