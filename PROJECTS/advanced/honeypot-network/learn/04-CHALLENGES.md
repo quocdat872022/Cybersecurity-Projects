@@ -616,10 +616,10 @@ Read their code, understand their tradeoffs, steal their good ideas.
 
 Track your progress:
 
-- [ ] Easy 1: Telnet Honeypot
-- [ ] Easy 2: GeoIP Enrichment
-- [ ] Easy 3: Credential Analytics
-- [ ] Intermediate 4: SMTP Honeypot
+- [x] Easy 1: Telnet Honeypot
+- [x] Easy 2: GeoIP Enrichment
+- [x] Easy 3: Credential Analytics
+- [x] Intermediate 4: SMTP Honeypot
 - [ ] Intermediate 5: Session Threat Scoring
 - [ ] Intermediate 6: Webhook Alerting
 - [ ] Advanced 7: Multi-Sensor Deployment

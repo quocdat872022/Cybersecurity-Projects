@@ -31,6 +31,7 @@ const (
 	ServiceMySQL
 	ServiceRedis
 	ServiceTelnet
+	ServiceSMTP
 )
 
 var serviceNames = map[ServiceType]string{
@@ -41,6 +42,7 @@ var serviceNames = map[ServiceType]string{
 	ServiceMySQL:  "mysql",
 	ServiceRedis:  "redis",
 	ServiceTelnet: "telnet",
+	ServiceSMTP:   "smtp",
 }
 
 var serviceLabels = map[ServiceType]string{
@@ -51,6 +53,7 @@ var serviceLabels = map[ServiceType]string{
 	ServiceMySQL:  "MySQL",
 	ServiceRedis:  "Redis",
 	ServiceTelnet: "Telnet",
+	ServiceSMTP:   "SMTP",
 }
 
 func (s ServiceType) String() string {

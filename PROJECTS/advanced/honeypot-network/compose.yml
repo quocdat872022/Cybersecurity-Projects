@@ -65,6 +65,7 @@ services:
     ports:
       - "${HIVE_SSH_PORT:-2211}:2222"
       - "${HIVE_TELNET_PORT:-2311}:2333"
+      - "${HIVE_SMTP_PORT:-2825}:2525"
       - "${HIVE_HTTP_PORT:-8055}:8080"
       - "${HIVE_FTP_PORT:-21272}:2121"
       - "${HIVE_SMB_PORT:-46353}:4450"

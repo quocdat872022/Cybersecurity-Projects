@@ -28,6 +28,7 @@ const (
 	DefaultMySQLPort  = 3307
 	DefaultRedisPort  = 6380
 	DefaultTelnetPort = 2333
+	DefaultSMTPPort   = 2525
 	DefaultAPIPort    = 8000
 )
 
@@ -39,6 +40,7 @@ const (
 	RedisBanner  = "7.0.11"
 	SMBDialect   = "SMB 2.1"
 	TelnetBanner = "Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-105-generic x86_64)"
+	SMTPBanner   = "220 mail.internal.local ESMTP Postfix (Ubuntu)"
 )
 
 const (

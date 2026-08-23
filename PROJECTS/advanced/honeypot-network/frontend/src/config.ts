@@ -130,6 +130,7 @@ export const SERVICE_LABELS: Record<string, string> = {
   mysql: 'MySQL',
   redis: 'Redis',
   telnet: 'Telnet',
+  smtp: 'SMTP'
 }
 
 export const BLOCKLIST_FORMATS = ['plain', 'iptables', 'nginx', 'csv'] as const

@@ -71,6 +71,7 @@ services:
       - "6355:6380"
       - "2323:2333"
       - "8184:8000"
+      - "18447:2525"
     volumes:
       - .:/app
       - dev-gomod:/go/pkg/mod

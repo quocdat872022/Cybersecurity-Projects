@@ -32,6 +32,7 @@ type Config struct {
 	MySQL    MySQLConfig    `yaml:"mysql"`
 	Redis    RedisConfig    `yaml:"redis"`
 	Telnet   TelnetConfig   `yaml:"telnet"`
+	SMTP     SMTPConfig     `yaml:"smtp"`
 	Database DatabaseConfig `yaml:"database"`
 	Stream   StreamConfig   `yaml:"stream"`
 	API      APIConfig      `yaml:"api"`
@@ -86,6 +87,13 @@ type RedisConfig struct {
 }
 
 type TelnetConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	Port     int    `yaml:"port"`
+	Banner   string `yaml:"banner"`
+	Hostname string `yaml:"hostname"`
+}
+
+type SMTPConfig struct {
 	Enabled  bool   `yaml:"enabled"`
 	Port     int    `yaml:"port"`
 	Banner   string `yaml:"banner"`
@@ -174,6 +182,12 @@ func Default() *Config {
 			Enabled:  true,
 			Port:     DefaultTelnetPort,
 			Banner:   TelnetBanner,
+			Hostname: DefaultHostname,
+		},
+		SMTP: SMTPConfig{
+			Enabled:  true,
+			Port:     DefaultSMTPPort,
+			Banner:   SMTPBanner,
 			Hostname: DefaultHostname,
 		},
 		Database: DatabaseConfig{
@@ -271,6 +285,8 @@ func applyEnvOverrides(cfg *Config) {
 	applyPortOverride("HIVE_REDIS_PORT", &cfg.Redis.Port)
 	applyPortOverride("HIVE_TELNET_PORT", &cfg.Telnet.Port)
 	applyBoolOverride("HIVE_TELNET_ENABLED", &cfg.Telnet.Enabled)
+	applyPortOverride("HIVE_SMTP_PORT", &cfg.SMTP.Port)
+	applyBoolOverride("HIVE_SMTP_ENABLED", &cfg.SMTP.Enabled)
 	applyPortOverride("HIVE_API_PORT", &cfg.API.Port)
 
 	applyBoolOverride("HIVE_SSH_ENABLED", &cfg.SSH.Enabled)

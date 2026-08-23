@@ -657,6 +657,9 @@ func (s *Server) handleSensors(
 	if s.cfg.Telnet.Enabled {
 		services = append(services, "telnet")
 	}
+	if s.cfg.SMTP.Enabled {
+		services = append(services, "smtp")
+	}
 
 	sensor := sensorInfo{
 		ID:        s.cfg.Sensor.ID,

@@ -35,6 +35,7 @@ import (
 	"github.com/CarterPerez-dev/hive/internal/redisd"
 	"github.com/CarterPerez-dev/hive/internal/session"
 	"github.com/CarterPerez-dev/hive/internal/smbd"
+	"github.com/CarterPerez-dev/hive/internal/smtpd"
 	"github.com/CarterPerez-dev/hive/internal/sshd"
 	"github.com/CarterPerez-dev/hive/internal/store"
 	"github.com/CarterPerez-dev/hive/internal/telnetd"
@@ -268,6 +269,14 @@ func buildServices(
 	if cfg.Telnet.Enabled {
 		services = append(services,
 			telnetd.New(
+				cfg, bus, logger, tracker, limiter,
+			),
+		)
+	}
+
+	if cfg.SMTP.Enabled {
+		services = append(services,
+			smtpd.New(
 				cfg, bus, logger, tracker, limiter,
 			),
 		)
