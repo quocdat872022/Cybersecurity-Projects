@@ -144,10 +144,10 @@ class NetworkScanner:
                     packet.payload,
                     packet.src_ip,
                     packet.dst_ip,
-                    path,
-                    packet_count,
-                    dns_detector,
-                    result,
+                    path = path,
+                    packet_num = packet_count,
+                    dns_detector = dns_detector,
+                    result = result,
                 )
 
             if packet.payload:
@@ -182,6 +182,7 @@ class NetworkScanner:
         payload: bytes,
         src_ip: str,
         dst_ip: str,
+        *,
         path: Path,
         packet_num: int,
         dns_detector: DnsExfilDetector,
