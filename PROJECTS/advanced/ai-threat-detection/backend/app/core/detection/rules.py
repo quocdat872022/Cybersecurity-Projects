@@ -11,12 +11,12 @@ INJECTION 0.90, SQL_INJECTION 0.85, XXE_INJECTION 0.82,
 XSS 0.80, FILE_INCLUSION 0.75, SSRF 0.70, CRLF_INJECTION
 0.65, PATH_TRAVERSAL 0.60, OPEN_REDIRECT 0.55),
 double-encoding detection (0.40), scanner user-agent
-signature matching (0.35), and 2 _ThresholdRules
+signature matching (0.35), and 3 _ThresholdRules
 (RATE_ANOMALY >100 req/min 0.30, HIGH_ERROR_RATE >50%
-0.25). Final score takes the highest match plus 0.05
-boost per additional rule, capped at 1.0. Returns a
-RuleResult with threat_score, severity, matched_rules,
-and component_scores
+0.25, METHOD_ANOMALY method_entropy_5m > 1.5 0.30).
+Final score takes the highest match plus 0.05 boost per
+additional rule, capped at 1.0. Returns a RuleResult with
+threat_score, severity, matched_rules, and component_scores
 
 Connects to:
   core/features/
@@ -90,6 +90,23 @@ _PATTERN_RULES: list[_PatternRule] = [
 _THRESHOLD_RULES: list[_ThresholdRule] = [
     _ThresholdRule("RATE_ANOMALY", "req_count_1m", 100.0, 0.30),
     _ThresholdRule("HIGH_ERROR_RATE", "error_rate_5m", 0.5, 0.25),
+    # Challenge 2: Add Request Method Anomaly Detection
+    #
+    # Fires when an IP's HTTP method mix over the last 5
+    # minutes carries more than ~1.5 bits of Shannon entropy
+    # (see WindowAggregator._method_entropy in
+    # core/features/aggregator.py). Normal clients are
+    # dominated by GET with occasional POST, which sits well
+    # below this threshold. An IP issuing a roughly even split
+    # across GET/PUT/DELETE/PATCH/OPTIONS is characteristic of
+    # automated API enumeration probing for endpoints that
+    # respond differently to non-standard methods (e.g. 200
+    # instead of 405 on an unauthenticated PUT). Scored at
+    # 0.30 — the same tier as RATE_ANOMALY — since this is a
+    # behavioral signal with real potential for false positives
+    # against legitimate REST API clients that use several
+    # methods deliberately.
+    _ThresholdRule("METHOD_ANOMALY", "method_entropy_5m", 1.5, 0.30),
 ]
 
 _DOUBLE_ENCODING_SCORE = 0.40

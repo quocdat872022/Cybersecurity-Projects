@@ -574,8 +574,8 @@ Stuck on a challenge?
 
 Track your progress:
 
-- [ ] Easy 1: Add XXE detection rule
-- [ ] Easy 2: Add method anomaly detection
+- [x] Easy 1: Add XXE detection rule
+- [x] Easy 2: Add method anomaly detection
 - [ ] Easy 3: Add country blocklist
 - [ ] Intermediate 4: Build active learning feedback loop
 - [ ] Intermediate 5: Add error log analysis
