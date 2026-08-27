@@ -51,7 +51,7 @@ from app.core.features.patterns import (
 from app.core.features.signatures import SCANNER_USER_AGENTS
 from app.core.detection.ensemble import classify_severity as _classify_severity
 from app.core.ingestion.parsers import ParsedLogEntry
-
+from app.config import settings
 
 class _PatternRule(NamedTuple):
     """
@@ -111,6 +111,7 @@ _THRESHOLD_RULES: list[_ThresholdRule] = [
 
 _DOUBLE_ENCODING_SCORE = 0.40
 _SCANNER_UA_SCORE = 0.35
+_COUNTRY_BLOCK_SCORE = 0.25
 _BOOST_PER_ADDITIONAL_RULE = 0.05
 
 
@@ -157,6 +158,13 @@ class RuleEngine:
         ua_lower = entry.user_agent.lower()
         if any(sig in ua_lower for sig in SCANNER_USER_AGENTS):
             matched.append(("SCANNER_UA", _SCANNER_UA_SCORE))
+
+        country_code = features.get("country_code", "")
+        if (
+            isinstance(country_code, str)
+            and country_code.upper() in settings.blocked_countries_set
+        ):
+            matched.append(("COUNTRY_BLOCKED", _COUNTRY_BLOCK_SCORE))
 
         for trule in _THRESHOLD_RULES:
             value = features.get(trule.feature_key, 0)
