@@ -1,7 +1,10 @@
 repos:
   # Python Ruff Checks
+  # This rev is the single source of truth for the ruff version.
+  # .github/workflows/lint.yml reads it from this file so CI and the
+  # local hook can never lint with two different rule sets.
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.1
+    rev: v0.16.1
     hooks:
       # Beginner projects
       - id: ruff
@@ -95,6 +98,12 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
         files: ^PROJECTS/beginner/linux-ebpf-security-tracer/
         exclude: (\.venv|__pycache__|\.pytest_cache)/
+
+      - id: ruff
+        name: ruff check (prompt-injection-firewall)
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^PROJECTS/beginner/prompt-injection-firewall/
+        exclude: (\.venv|__pycache__|\.pytest_cache|\.mypy_cache|\.hypothesis)/
 
       # Foundations projects
       - id: ruff
@@ -449,9 +458,9 @@ repos:
       - id: check-symlinks
         exclude: (\.pnpm-store|node_modules)/
       - id: end-of-file-fixer
-        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/|^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/crates/tlsfp-intel/seeds/
+        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/|^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/crates/tlsfp-intel/seeds/|^PROJECTS/advanced/zero-day-vulnerability-scanner/crates/lisdex-triage/tests/fixtures/
       - id: trailing-whitespace
-        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/|^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/crates/tlsfp-intel/seeds/
+        exclude: (\.pnpm-store|node_modules)/|^PROJECTS/advanced/hsm-emulator/vendor/|^PROJECTS/intermediate/ja3-ja4-tls-fingerprinting/crates/tlsfp-intel/seeds/|^PROJECTS/advanced/zero-day-vulnerability-scanner/crates/lisdex-triage/tests/fixtures/
       - id: check-illegal-windows-names
         exclude: (\.pnpm-store|node_modules)/
       - id: check-executables-have-shebangs
