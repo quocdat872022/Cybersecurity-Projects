@@ -10,7 +10,11 @@ source_ip, since/until datetime filters, and limit/
 offset pagination (max 100). GET /threats/{threat_id}
 fetches a single event by UUID, returning 404 if not
 found. Both delegate to threat_service for database
-queries
+queries. GET /threats/review-queue returns unreviewed 
+MEDIUM-severity events for analyst triage. 
+PATCH /threats/{threat_id}/review accepts a label 
+(true_positive/false_positive) to mark an event 
+as reviewed, returning 404 if the event does not exist.
 
 Connects to:
   deps.py               - get_session dependency
@@ -27,7 +31,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_session
-from app.schemas.threats import ThreatEventResponse, ThreatListResponse
+from app.schemas.threats import ThreatEventResponse, ThreatListResponse, ThreatReviewRequest
 from app.services import threat_service
 
 router = APIRouter(prefix="/threats", tags=["threats"])
@@ -66,6 +70,31 @@ async def get_threat(
     Fetch a single threat event by ID.
     """
     result = await threat_service.get_threat_by_id(session, threat_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Threat event not found")
+    return result
+
+@router.get("/review-queue", response_model=list[ThreatEventResponse])
+async def review_queue(
+    session: AsyncSession = Depends(get_session),
+    limit: int = Query(50, ge=1, le=100),
+) -> list[ThreatEventResponse]:
+    """
+    Unreviewed MEDIUM-severity events for analyst triage.
+    """
+    return await threat_service.get_review_queue(session, limit)
+
+
+@router.patch("/{threat_id}/review", response_model=ThreatEventResponse)
+async def review_threat(
+    threat_id: uuid.UUID,
+    body: ThreatReviewRequest,
+    session: AsyncSession = Depends(get_session),
+) -> ThreatEventResponse:
+    """
+    Mark a threat event as a true or false positive.
+    """
+    result = await threat_service.mark_reviewed(session, threat_id, body.label)
     if result is None:
         raise HTTPException(status_code=404, detail="Threat event not found")
     return result

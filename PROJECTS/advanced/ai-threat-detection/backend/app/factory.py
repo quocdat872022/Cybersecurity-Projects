@@ -54,6 +54,7 @@ from app.core.ingestion.tailer import LogTailer
 from app.core.redis_manager import redis_manager
 from app.models import model_metadata as _model_metadata_reg  # noqa: F401
 from app.models import threat_event as _threat_event_reg  # noqa: F401
+from app.core.active_learning import LabelWatcher
 
 if TYPE_CHECKING:
     from app.core.detection.inference import InferenceEngine
@@ -115,6 +116,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     await pipeline.start()
 
+    label_watcher = LabelWatcher(app.state.session_factory)
+    label_watcher.start()
+    app.state.label_watcher = label_watcher
+
     tailer = None
     log_dir = Path(settings.nginx_log_path).resolve().parent
     if log_dir.is_dir():
@@ -142,6 +147,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.pipeline_running = False
     if tailer is not None:
         tailer.stop()
+    await app.state.label_watcher.stop()
     await pipeline.stop()
     geoip.close()
     await redis_manager.disconnect()

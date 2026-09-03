@@ -53,6 +53,7 @@ export const ROUTES = {
   DASHBOARD: '/',
   THREATS: '/threats',
   MODELS: '/models',
+  REVIEW: '/review',
 } as const
 
 export const STORAGE_KEYS = {
