@@ -11,6 +11,7 @@ scan:
       - ".git"
       - "node_modules"
       - ".venv"
+      - test_*
     include_extensions:
       - ".pdf"
       - ".docx"
