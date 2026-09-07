@@ -4,6 +4,9 @@ cli.py
 
 Challenge 4 addition: registers the ``cache`` sub-typer so that
 ``dlp-scan cache stats`` and ``dlp-scan cache clear`` are available.
+
+Challenge 8 addition: registers ``dlp-scan watch`` for real-time
+directory monitoring (see commands/watch.py).
 """
 
 
@@ -15,6 +18,7 @@ from dlp_scanner import __version__
 from dlp_scanner.commands.report import report_app
 from dlp_scanner.commands.cache import cache_app
 from dlp_scanner.commands.scan import register
+from dlp_scanner.commands.watch import register as register_watch
 
 
 app = typer.Typer(
@@ -75,5 +79,6 @@ def main(
 
 
 register(app)
+register_watch(app)
 app.add_typer(report_app, name = "report")
 app.add_typer(cache_app, name = "cache")
