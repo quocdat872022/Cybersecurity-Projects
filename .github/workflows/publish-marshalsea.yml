@@ -40,7 +40,8 @@ jobs:
         working-directory: PROJECTS/beginner/deserialization-gadget-lab
         run: |
           for suite in test/marshal/parser_test.rb test/scanner_test.rb test/chains_test.rb \
-                       test/marshal/boundary_detector_test.rb test/corpus_test.rb; do
+                       test/marshal/boundary_detector_test.rb test/marshal/load_guard_test.rb \
+                       test/psych/inspector_test.rb test/corpus_test.rb; do
             echo "::group::${suite}"
             ruby -Ilib -Itest "${suite}"
             echo "::endgroup::"
