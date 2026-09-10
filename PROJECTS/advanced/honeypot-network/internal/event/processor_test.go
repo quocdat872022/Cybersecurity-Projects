@@ -29,7 +29,7 @@ func (f *fakeStore) UpsertIOC(_ context.Context, ioc *types.IOC) error {
 
 func TestProcessorExtractsIOCsFromSMTPBody(t *testing.T) {
 	store := &fakeStore{}
-	p := NewProcessor(1, NewBus(), store, nil, nil, nil, testLogger())
+	p := NewProcessor(1, NewBus(), store, nil, nil, nil, nil, testLogger())
 
 	ev := &types.Event{
 		ID:          "ev-1",

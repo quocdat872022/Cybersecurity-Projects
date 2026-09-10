@@ -55,6 +55,7 @@ type SessionRepository interface {
 	ListSessions(
 		ctx context.Context,
 		service string,
+		minScore int,
 		limit, offset int,
 	) ([]*types.Session, int64, error)
 	ActiveSessions(

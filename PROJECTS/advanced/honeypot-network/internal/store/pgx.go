@@ -16,6 +16,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -364,6 +365,16 @@ func (s *PgxStore) InsertSession(
 func (s *PgxStore) UpdateSession(
 	ctx context.Context, sess *types.Session,
 ) error {
+	tags := sess.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+
+	mitreTechniques := sess.MITRETechniques
+	if mitreTechniques == nil {
+		mitreTechniques = []string{}
+	}
+
 	_, err := s.pool.Exec(ctx, `
 		UPDATE sessions SET
 			ended_at = $2,
@@ -376,7 +387,7 @@ func (s *PgxStore) UpdateSession(
 		WHERE id = $1`,
 		sess.ID, sess.EndedAt, sess.LoginSuccess,
 		sess.Username, sess.CommandCount,
-		sess.MITRETechniques, sess.ThreatScore, sess.Tags,
+		mitreTechniques, sess.ThreatScore, tags,
 	)
 	if err != nil {
 		return fmt.Errorf("updating session: %w", err)
@@ -403,56 +414,63 @@ func (s *PgxStore) GetSession(
 func (s *PgxStore) ListSessions(
 	ctx context.Context,
 	service string,
+	minScore int,
 	limit, offset int,
 ) ([]*types.Session, int64, error) {
-	var total int64
-	countQuery := `SELECT COUNT(*) FROM sessions`
-	listQuery := `
-		SELECT id, sensor_id, started_at, ended_at,
-			service_type, source_ip, source_port, dest_port,
-			client_version, login_success, username,
-			command_count, mitre_techniques, threat_score, tags
-		FROM sessions`
+	var (
+		conditions []string
+		args       []interface{}
+	)
 
 	if service != "" {
-		countQuery += ` WHERE service_type = $1`
-		listQuery += ` WHERE service_type = $1
-			ORDER BY started_at DESC LIMIT $2 OFFSET $3`
-
-		if err := s.pool.QueryRow(
-			ctx, countQuery, service,
-		).Scan(&total); err != nil {
-			return nil, 0, fmt.Errorf(
-				"counting sessions: %w", err,
-			)
-		}
-
-		rows, err := s.pool.Query(
-			ctx, listQuery, service, limit, offset,
+		args = append(args, service)
+		conditions = append(
+			conditions,
+			fmt.Sprintf("service_type = $%d", len(args)),
 		)
-		if err != nil {
-			return nil, 0, fmt.Errorf(
-				"listing sessions: %w", err,
-			)
-		}
-		defer rows.Close()
-		sessions, err := scanSessions(rows)
-		return sessions, total, err
 	}
 
-	listQuery += ` ORDER BY started_at DESC LIMIT $1 OFFSET $2`
+	if minScore > 0 {
+		args = append(args, minScore)
+		conditions = append(
+			conditions,
+			fmt.Sprintf("threat_score >= $%d", len(args)),
+		)
+	}
 
+	where := ""
+	if len(conditions) > 0 {
+		where = " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	var total int64
+	countQuery := "SELECT COUNT(*) FROM sessions" + where
 	if err := s.pool.QueryRow(
-		ctx, countQuery,
+		ctx, countQuery, args...,
 	).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("counting sessions: %w", err)
 	}
 
-	rows, err := s.pool.Query(ctx, listQuery, limit, offset)
+	limitIdx := len(args) + 1
+	offsetIdx := len(args) + 2
+	listQuery := fmt.Sprintf(`
+		SELECT id, sensor_id, started_at, ended_at,
+			service_type, source_ip, source_port, dest_port,
+			client_version, login_success, username,
+			command_count, mitre_techniques, threat_score, tags
+		FROM sessions%s
+		ORDER BY started_at DESC LIMIT $%d OFFSET $%d`,
+		where, limitIdx, offsetIdx,
+	)
+
+	listArgs := append(append([]interface{}{}, args...), limit, offset)
+
+	rows, err := s.pool.Query(ctx, listQuery, listArgs...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("listing sessions: %w", err)
 	}
 	defer rows.Close()
+
 	sessions, err := scanSessions(rows)
 	return sessions, total, err
 }

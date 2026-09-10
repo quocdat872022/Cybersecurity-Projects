@@ -7,6 +7,14 @@ import { ServiceBadge } from '@/components/service-badge'
 import { SessionPlayer } from '@/components/session-player'
 import styles from './sessions.module.scss'
 
+function scoreClass(score: number): string {
+  if (score > 75) return styles.scoreCritical ?? ''
+  if (score > 50) return styles.scoreHigh ?? ''
+  if (score > 25) return styles.scoreMedium ?? ''
+  return styles.scoreLow ?? ''
+}
+
+
 export function SessionDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: session, isLoading } = useSession(id ?? '')
@@ -21,7 +29,14 @@ export function SessionDetailPage() {
     { label: 'SOURCE', value: `${session.source_ip}:${session.source_port}` },
     { label: 'USERNAME', value: session.username || '\u2014' },
     { label: 'COMMANDS', value: String(session.command_count) },
-    { label: 'THREAT SCORE', value: String(session.threat_score) },
+    {
+      label: 'THREAT SCORE',
+      value: (
+        <span className={scoreClass(session.threat_score)}>
+          {session.threat_score}
+        </span>
+      ),
+    },
     { label: 'STARTED', value: new Date(session.started_at).toLocaleString() },
     {
       label: 'ENDED',

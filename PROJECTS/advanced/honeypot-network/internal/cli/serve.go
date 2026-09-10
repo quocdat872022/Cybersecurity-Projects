@@ -125,6 +125,7 @@ func runServe(ctx context.Context) error {
 		redisStreamer,
 		geoLookup,
 		detector,
+		tracker,
 		logger,
 	)
 

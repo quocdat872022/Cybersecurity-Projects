@@ -335,9 +335,10 @@ func (s *Server) handleSessions(
 	ctx := r.Context()
 	limit, offset := parsePagination(r)
 	service := r.URL.Query().Get("service")
+	minScore := parseMinScore(r)
 
 	sessions, total, err := s.store.ListSessions(
-		ctx, service, limit, offset,
+		ctx, service, minScore, limit, offset,
 	)
 	if err != nil {
 		s.writeError(
@@ -696,6 +697,18 @@ func parsePagination(r *http.Request) (int, int) {
 	}
 
 	return limit, offset
+}
+
+func parseMinScore(r *http.Request) int {
+	v := r.URL.Query().Get("min_score")
+	if v == "" {
+		return 0
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil || n < 0 {
+		return 0
+	}
+	return n
 }
 
 func parseDuration(r *http.Request) time.Duration {

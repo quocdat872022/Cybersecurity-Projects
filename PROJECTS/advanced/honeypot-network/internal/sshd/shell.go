@@ -38,6 +38,7 @@ func RunShell(
 	username string,
 	hostname string,
 	bus *event.Bus,
+	tracker *session.Tracker,
 	recorder *session.Recorder,
 	cols int,
 	rows int,
@@ -83,7 +84,7 @@ func RunShell(
 		}
 
 		recorder.WriteInput([]byte(line + "\n"))
-
+		tracker.IncrCommandCount(sessionID)
 		publishCommand(
 			bus, sessionID, sensorID,
 			sourceIP, line, hostname,

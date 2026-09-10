@@ -134,3 +134,24 @@
   @include section-label;
   margin-top: var(--space-16);
 }
+
+
+.scoreLow {
+  color: var(--active);
+  font-weight: 700;
+}
+
+.scoreMedium {
+  color: oklch(75% 0.15 90);
+  font-weight: 700;
+}
+
+.scoreHigh {
+  color: oklch(70% 0.19 55);
+  font-weight: 700;
+}
+
+.scoreCritical {
+  color: var(--critical);
+  font-weight: 700;
+}

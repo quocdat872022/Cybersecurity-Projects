@@ -246,7 +246,7 @@ func (s *SSHService) handleSessionRequest(
 			st.ch, st.sess.ID, s.cfg.Sensor.ID,
 			st.srcIP, st.username,
 			s.cfg.SSH.Hostname,
-			s.bus, st.recorder, st.cols, st.rows,
+			s.bus, s.tracker, st.recorder, st.cols, st.rows,
 		)
 		s.saveRecording(st)
 		_ = st.ch.Close()

@@ -105,6 +105,8 @@ func (s *RedisService) handleCmd(
 		state.keys,
 	)
 
+	s.tracker.IncrCommandCount(state.sessionID)
+	
 	s.publishCommand(state, cmd, cmdName)
 
 	if isExploitCommand(cmdName) {

@@ -11,8 +11,8 @@ import { apiClient, QUERY_STRATEGIES } from '@/core/api'
 
 export const sessionQueries = {
   all: () => QUERY_KEYS.SESSIONS.ALL,
-  list: (limit: number, offset: number, service?: string) =>
-    QUERY_KEYS.SESSIONS.LIST(limit, offset, service),
+  list: (limit: number, offset: number, service?: string, minScore?: number) =>
+    [...QUERY_KEYS.SESSIONS.LIST(limit, offset, service), { minScore }] as const,
   byId: (id: string) => QUERY_KEYS.SESSIONS.BY_ID(id),
   replay: (id: string) => QUERY_KEYS.SESSIONS.REPLAY(id),
 } as const
@@ -20,14 +20,15 @@ export const sessionQueries = {
 export const useSessions = (
   limit = PAGINATION.DEFAULT_LIMIT,
   offset = 0,
-  service?: string
+  service?: string,
+  minScore?: number
 ): UseQueryResult<PaginatedResponse<Session[]>, Error> => {
   return useQuery({
-    queryKey: sessionQueries.list(limit, offset, service),
+    queryKey: sessionQueries.list(limit, offset, service, minScore),
     queryFn: async () => {
       const response = await apiClient.get<PaginatedResponse<Session[]>>(
         API_ENDPOINTS.SESSIONS.LIST,
-        { params: { limit, offset, service } }
+        { params: { limit, offset, service, min_score: minScore } }
       )
       return response.data
     },
