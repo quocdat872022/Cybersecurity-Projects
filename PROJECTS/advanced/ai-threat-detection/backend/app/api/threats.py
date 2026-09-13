@@ -61,6 +61,16 @@ async def list_threats(
     )
 
 
+@router.get("/review-queue", response_model=list[ThreatEventResponse])
+async def review_queue(
+    session: AsyncSession = Depends(get_session),
+    limit: int = Query(50, ge=1, le=100),
+) -> list[ThreatEventResponse]:
+    """
+    Unreviewed MEDIUM-severity events for analyst triage.
+    """
+    return await threat_service.get_review_queue(session, limit)
+
 @router.get("/{threat_id}", response_model=ThreatEventResponse)
 async def get_threat(
         threat_id: uuid.UUID,
@@ -73,17 +83,6 @@ async def get_threat(
     if result is None:
         raise HTTPException(status_code=404, detail="Threat event not found")
     return result
-
-@router.get("/review-queue", response_model=list[ThreatEventResponse])
-async def review_queue(
-    session: AsyncSession = Depends(get_session),
-    limit: int = Query(50, ge=1, le=100),
-) -> list[ThreatEventResponse]:
-    """
-    Unreviewed MEDIUM-severity events for analyst triage.
-    """
-    return await threat_service.get_review_queue(session, limit)
-
 
 @router.patch("/{threat_id}/review", response_model=ThreatEventResponse)
 async def review_threat(
