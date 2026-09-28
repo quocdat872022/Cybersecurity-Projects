@@ -5,6 +5,13 @@ scan.py
 Challenge 4 change: the ``file`` sub-command gains a ``--no-cache`` /
 ``-N`` flag that forces a full rescan while still writing results back to
 the cache for future runs.
+
+Challenge 9 change: every scan sub-command gains a ``--siem`` flag that,
+when passed, forwards the completed scan result to whichever SIEM
+transport is configured under ``output.siem`` in the config file
+(syslog or Splunk HEC -- see reporters/syslog_reporter.py and
+reporters/splunk_hec_reporter.py). Forwarding happens in addition to,
+not instead of, the normal console/file/stdout report.
 """
 
 
@@ -19,6 +26,10 @@ OUTPUT_HELP: str = "Write report to file"
 NO_CACHE_HELP: str = (
     "Bypass the hash cache and force a full rescan. "
     "Results are still cached for future incremental runs."
+)
+SIEM_HELP: str = (
+    "Forward this scan's findings to the SIEM configured under "
+    "output.siem in your config file (syslog or Splunk HEC)."
 )
 
 VALID_FORMATS: frozenset[str] = frozenset(
@@ -63,6 +74,14 @@ def scan_file(
             is_flag=True,
         ),
     ] = False,
+    siem: Annotated[
+        bool,
+        typer.Option(
+            "--siem",
+            help=SIEM_HELP,
+            is_flag=True,
+        ),
+    ] = False,
 ) -> None:
     """
     Scan files and directories for sensitive data.
@@ -77,6 +96,7 @@ def scan_file(
         output_format,
         output_file,
         no_cache=no_cache,
+        siem=siem,
     )
 
 
@@ -102,11 +122,19 @@ def scan_db(
             help=OUTPUT_HELP,
         ),
     ] = "",
+    siem: Annotated[
+        bool,
+        typer.Option(
+            "--siem",
+            help=SIEM_HELP,
+            is_flag=True,
+        ),
+    ] = False,
 ) -> None:
     """
     Scan database tables for sensitive data.
     """
-    _run_scan(ctx, "db", target, output_format, output_file)
+    _run_scan(ctx, "db", target, output_format, output_file, siem=siem)
 
 
 def scan_network(
@@ -131,11 +159,21 @@ def scan_network(
             help=OUTPUT_HELP,
         ),
     ] = "",
+    siem: Annotated[
+        bool,
+        typer.Option(
+            "--siem",
+            help=SIEM_HELP,
+            is_flag=True,
+        ),
+    ] = False,
 ) -> None:
     """
     Scan network capture files for sensitive data in transit.
     """
-    _run_scan(ctx, "network", target, output_format, output_file)
+    _run_scan(
+        ctx, "network", target, output_format, output_file, siem=siem
+    )
 
 
 def register(app: typer.Typer) -> None:
@@ -155,6 +193,7 @@ def _run_scan(
     output_file: str,
     *,
     no_cache: bool = False,
+    siem: bool = False,
 ) -> None:
     """
     Shared scan execution logic.
@@ -194,6 +233,15 @@ def _run_scan(
     if output_file:
         config.output.output_file = output_file
 
+    if siem and not config.output.siem.type:
+        typer.echo(
+            "--siem was passed but no SIEM is configured. "
+            "Set output.siem.type to 'syslog' or 'splunk_hec' "
+            "in your config file.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     engine = ScanEngine(config)
 
     if scan_type == "file":
@@ -202,6 +250,16 @@ def _run_scan(
         result = engine.scan_database(target)
     else:
         result = engine.scan_network(target)
+
+    if siem:
+        try:
+            sent = engine.send_to_siem(result)
+            typer.echo(
+                f"Forwarded {sent} message(s) to "
+                f"{config.output.siem.type} SIEM"
+            )
+        except Exception as exc:
+            typer.echo(f"SIEM forwarding failed: {exc}", err=True)
 
     if output_file:
         engine.write_report(result, output_file)

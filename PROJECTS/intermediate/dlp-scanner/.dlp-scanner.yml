@@ -81,6 +81,11 @@ compliance:
 
 output:
   format: "console"
+  siem:
+    type: "splunk_hec"
+    hec_url: "https://192.168.11.131:8088"
+    hec_token: "697caac4-6a4a-4f28-bf68-5602144dda3b"
+    verify_ssl: false
   output_file: ""
   redaction_style: "partial"
   verbose: false

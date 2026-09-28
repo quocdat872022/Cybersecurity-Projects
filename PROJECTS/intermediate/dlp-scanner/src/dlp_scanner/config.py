@@ -7,6 +7,7 @@ config.py
 from pathlib import Path
 from typing import Any
 
+from typing import Literal
 from pydantic import BaseModel, Field
 from ruamel.yaml import YAML
 
@@ -27,6 +28,8 @@ from dlp_scanner.constants import (
     Severity,
 )
 
+SiemType = Literal["", "syslog", "splunk_hec"]
+SyslogProtocol = Literal["tcp", "udp"]
 
 class FileScanConfig(BaseModel):
     """
@@ -88,6 +91,31 @@ class DetectionConfig(BaseModel):
     # a built-in rule -- see detectors/rules/custom.py.
     custom_rules_dir: str = ""
 
+class SiemConfig(BaseModel):
+    """
+    Configuration for shipping findings to a SIEM after a scan
+ 
+    ``type`` selects the transport: "syslog" for RFC 5424 over TCP/UDP,
+    "splunk_hec" for Splunk's HTTP Event Collector, or "" (the default)
+    to leave SIEM forwarding disabled. Only the fields relevant to the
+    selected type need to be set; the rest are ignored.
+    """
+    type: SiemType = ""
+ 
+    # syslog transport
+    host: str = ""
+    port: int = 514
+    protocol: SyslogProtocol = "tcp"
+    facility: int = 16  # local0
+ 
+    # splunk_hec transport
+    hec_url: str = ""
+    hec_token: str = ""
+    verify_ssl: bool = True
+ 
+    # shared by both transports
+    batch_size: int = 50
+    flush_interval_seconds: float = 5.0
 
 class ComplianceConfig(BaseModel):
     """
@@ -179,6 +207,7 @@ class OutputConfig(BaseModel):
     redaction_style: RedactionStyle = "partial"
     verbose: bool = False
     color: bool = True
+    siem: "SiemConfig" = Field(default_factory = SiemConfig)
 
 
 class LoggingConfig(BaseModel):

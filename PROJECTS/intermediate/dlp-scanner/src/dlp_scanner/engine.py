@@ -1,6 +1,10 @@
 """
 ©AngelaMos | 2026
 engine.py
+
+Challenge 9 addition: ``send_to_siem`` dispatches a completed
+ScanResult to whichever SIEM transport is configured under
+``output.siem`` (syslog or Splunk HEC).
 """
 
 
@@ -23,6 +27,10 @@ from dlp_scanner.reporters.json_report import (
 )
 from dlp_scanner.reporters.sarif import SarifReporter
 from dlp_scanner.reporters.html_report import HtmlReporter
+from dlp_scanner.reporters.splunk_hec_reporter import (
+    SplunkHecReporter,
+)
+from dlp_scanner.reporters.syslog_reporter import SyslogReporter
 
 from dlp_scanner.scanners.db_scanner import (
     DatabaseScanner,
@@ -179,3 +187,50 @@ class ScanEngine:
             path = output_path,
             format = output_format or self._config.output.format,
         )
+
+    def send_to_siem(self, result: ScanResult) -> int:
+        """
+        Forward a completed scan result to the configured SIEM
+
+        Reads ``output.siem`` from the loaded config to decide the
+        transport (``"syslog"`` or ``"splunk_hec"``) and its connection
+        details. Returns the number of messages/events successfully
+        delivered. Raises ``ValueError`` if no SIEM is configured
+        (``output.siem.type`` is unset), so callers should check
+        ``self._config.output.siem.type`` first if forwarding is
+        optional for their code path.
+        """
+        siem = self._config.output.siem
+
+        if siem.type == "syslog":
+            reporter = SyslogReporter(
+                host = siem.host,
+                port = siem.port,
+                protocol = siem.protocol,
+                batch_size = siem.batch_size,
+                flush_interval = siem.flush_interval_seconds,
+            )
+            sent = reporter.send(result)
+
+        elif siem.type == "splunk_hec":
+            reporter = SplunkHecReporter(
+                hec_url = siem.hec_url,
+                hec_token = siem.hec_token,
+                batch_size = siem.batch_size,
+                flush_interval = siem.flush_interval_seconds,
+                verify_ssl = siem.verify_ssl,
+            )
+            sent = reporter.send(result)
+
+        else:
+            raise ValueError(
+                "No SIEM configured. Set output.siem.type to "
+                "'syslog' or 'splunk_hec' in your config."
+            )
+
+        log.info(
+            "siem_forward_complete",
+            siem_type = siem.type,
+            messages_sent = sent,
+        )
+        return sent
