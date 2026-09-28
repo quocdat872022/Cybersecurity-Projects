@@ -17,3 +17,7 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+PROJECTS/advanced/honeypot-network/frontend/pnpm-lock.yaml
+PROJECTS/advanced/honeypot-network/frontend/package.json
+PROJECTS/advanced/honeypot-network/frontend/pnpm-workspace.yaml
+
