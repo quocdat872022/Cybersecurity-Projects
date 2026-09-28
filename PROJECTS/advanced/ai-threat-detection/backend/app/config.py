@@ -74,6 +74,20 @@ class Settings(BaseSettings):
     ae_threshold_percentile: float = 99.5
     mlflow_tracking_uri: str = "file:./mlruns"
 
+    # Country blocklist (comma-separated ISO country codes, e.g. "CN,RU")
+    blocked_countries: str = ""
+
+    @property
+    def blocked_countries_set(self) -> frozenset[str]:
+        """
+        Parsed, upper-cased set of blocked ISO country codes.
+        """
+        return frozenset(
+            code.strip().upper()
+            for code in self.blocked_countries.split(",")
+            if code.strip()
+        )
+
     @model_validator(mode="after")
     def _check_ensemble_weights(self) -> Self:
         """

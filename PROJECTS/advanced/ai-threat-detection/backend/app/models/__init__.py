@@ -8,5 +8,6 @@ ThreatEvent and ModelMetadata
 
 from app.models.model_metadata import ModelMetadata
 from app.models.threat_event import ThreatEvent
+from app.models.training_state import TrainingState
 
-__all__ = ["ModelMetadata", "ThreatEvent"]
+__all__ = ["ModelMetadata", "ThreatEvent", "TrainingState"]

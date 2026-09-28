@@ -69,17 +69,21 @@ services:
       GIT_PYTHON_REFRESH: quiet
       MODEL_DIR: /app/data/models
       SKIP_AUTO_TRAIN: ${SKIP_AUTO_TRAIN:-false}
+      BLOCKED_COUNTRIES: ${BLOCKED_COUNTRIES:-}
     ports:
       - "${BACKEND_HOST_PORT:-36969}:8000"
     volumes:
       - ./backend:/app
       - model_data_dev:/app/data/models
       - nginx_logs_dev:/var/log/nginx
+      - geoip_data_dev:/usr/share/GeoIP:ro
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      geoip-updater:
+        condition: service_completed_successfully
     networks:
       - vigil_dev
     healthcheck:
@@ -108,6 +112,18 @@ services:
     networks:
       - vigil_dev
 
+  geoip-updater:
+    image: maxmindinc/geoipupdate:latest
+    container_name: vigil-geoip-dev
+    environment:
+      GEOIPUPDATE_ACCOUNT_ID: ${GEOIP_ACCOUNT_ID}
+      GEOIPUPDATE_LICENSE_KEY: ${GEOIP_LICENSE_KEY}
+      GEOIPUPDATE_EDITION_IDS: "GeoLite2-City"
+    volumes:
+      - geoip_data_dev:/usr/share/GeoIP
+    networks:
+      - vigil_dev
+
 networks:
   vigil_dev:
     driver: bridge
@@ -119,3 +135,5 @@ volumes:
   nginx_logs_dev:
     name: vigil_dev_nginx_logs
   frontend_node_modules_dev:
+  geoip_data_dev:
+    name: vigil_dev_geoip_data

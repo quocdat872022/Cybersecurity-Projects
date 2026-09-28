@@ -13,7 +13,9 @@ persists a ScoredRequest as a ThreatEvent with full
 request context, GeoIP data, feature vector, matched
 rules, and severity classification. _to_response converts
 ThreatEvent ORM models to ThreatEventResponse schemas
-with nested GeoInfo
+with nested GeoInfo. mark_reviewed records analyst feedback 
+on true/false-positive labels. get_review_queue fetches 
+unreviewed MEDIUM-severity events for triage.
 
 Connects to:
   models/threat_event     - ThreatEvent table operations
@@ -166,3 +168,43 @@ async def create_threat_event(
     session.add(event)
     await session.flush()
     return event
+
+
+async def mark_reviewed(
+    session: AsyncSession,
+    threat_id: uuid.UUID,
+    label: str,
+) -> ThreatEventResponse | None:
+    """
+    Record an analyst's true/false-positive label on a threat event.
+    """
+    event = await session.get(ThreatEvent, threat_id)
+    if event is None:
+        return None
+    event.reviewed = True
+    event.review_label = label
+    session.add(event)
+    await session.commit()
+    await session.refresh(event)
+    return _to_response(event)
+
+
+async def get_review_queue(
+    session: AsyncSession,
+    limit: int = 50,
+) -> list[ThreatEventResponse]:
+    """
+    Fetch unreviewed MEDIUM-severity events — the most ambiguous ones,
+    best suited for analyst triage.
+    """
+    query = (
+        select(ThreatEvent)
+        .where(
+            ThreatEvent.reviewed == False,  # noqa: E712  # type: ignore[arg-type]
+            ThreatEvent.severity == "MEDIUM",  # type: ignore[arg-type]
+        )
+        .order_by(ThreatEvent.created_at.desc())  # type: ignore[attr-defined]
+        .limit(limit)
+    )
+    rows = (await session.execute(query)).scalars().all()
+    return [_to_response(row) for row in rows]

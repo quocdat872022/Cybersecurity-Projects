@@ -10,7 +10,9 @@ UUID id, timestamps, request details, threat_score,
 severity (Literal HIGH/MEDIUM/LOW), component_scores,
 geo info, matched_rules, model_version, and review status
 (from_attributes enabled for ORM conversion). Threat
-ListResponse wraps paginated items with total/limit/offset
+ListResponse wraps paginated items with total/limit/offset.
+ThreatReviewRequest is for analyst feedback with label 
+(Literal true_positive/false_positive).
 
 Connects to:
   api/threats              - response_model for list and
@@ -70,3 +72,9 @@ class ThreatListResponse(BaseModel):
     limit: int
     offset: int
     items: list[ThreatEventResponse]
+
+class ThreatReviewRequest(BaseModel):
+    """
+    Analyst feedback payload for PATCH /threats/{id}/review.
+    """
+    label: Literal["true_positive", "false_positive"]

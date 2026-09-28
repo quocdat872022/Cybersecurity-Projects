@@ -54,7 +54,10 @@ from app.core.ingestion.tailer import LogTailer
 from app.core.redis_manager import redis_manager
 from app.models import model_metadata as _model_metadata_reg  # noqa: F401
 from app.models import threat_event as _threat_event_reg  # noqa: F401
-
+from app.core.active_learning import LabelWatcher
+from app.core.enrichment.correlator import EventCorrelator
+from app.core.ingestion.error_pipeline import ErrorAnalysisResult, ErrorLogPipeline
+from app.core.ingestion.error_tailer import DualLogTailer
 if TYPE_CHECKING:
     from app.core.detection.inference import InferenceEngine
 
@@ -113,19 +116,69 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         feature_queue_size=settings.feature_queue_size,
         alert_queue_size=settings.alert_queue_size,
     )
+    correlator = EventCorrelator()
+    pipeline._on_parsed = correlator.record_access 
+
     await pipeline.start()
 
+    label_watcher = LabelWatcher(app.state.session_factory)
+    label_watcher.start()
+    app.state.label_watcher = label_watcher
+
     tailer = None
+    error_pipeline = None
     log_dir = Path(settings.nginx_log_path).resolve().parent
+    error_log_path = str(Path(settings.nginx_log_path).with_name("error.log"))
+
     if log_dir.is_dir():
         loop = asyncio.get_running_loop()
-        position_path = Path(settings.model_dir) / ".tailer_pos.json"
-        tailer = LogTailer(
-            settings.nginx_log_path,
-            pipeline.raw_queue,
-            loop,
-            position_path=position_path,
-        )
+        access_position_path = Path(settings.model_dir) / ".tailer_pos.json"
+
+        if Path(error_log_path).parent.is_dir():
+            error_queue: asyncio.Queue[str | None] = asyncio.Queue(maxsize=500)
+
+            async def _log_error_analysis(result: ErrorAnalysisResult) -> None:
+                access_ctx = ""
+                if result.correlated.access is not None:
+                    access_ctx = (
+                        f" correlated_path={result.correlated.access.path}"
+                        f" correlated_ip={result.correlated.access.ip}"
+                        f" delta_s={result.correlated.time_delta_seconds:.2f}"
+                    )
+                logger.info(
+                    "error_event level=%s client_ip=%s body_entropy=%.2f "
+                    "body_attack_pattern=%s%s",
+                    result.error.level,
+                    result.error.client_ip,
+                    result.body_features["body_entropy"],
+                    result.body_features["body_has_attack_pattern"],
+                    access_ctx,
+                )
+
+            error_pipeline = ErrorLogPipeline(
+                error_queue=error_queue,
+                correlator=correlator,
+                on_result=_log_error_analysis,
+            )
+            await error_pipeline.start()
+
+            error_position_path = Path(settings.model_dir) / ".error_tailer_pos.json"
+            tailer = DualLogTailer(
+                access_log_path=settings.nginx_log_path,
+                error_log_path=error_log_path,
+                access_queue=pipeline.raw_queue,
+                error_queue=error_queue,
+                loop=loop,
+                access_position_path=access_position_path,
+                error_position_path=error_position_path,
+            )
+        else:
+            tailer = LogTailer(
+                settings.nginx_log_path,
+                pipeline.raw_queue,
+                loop,
+                position_path=access_position_path,
+            )
         tailer.start()
     else:
         logger.warning("Log directory %s not found — tailer disabled", log_dir)
@@ -134,6 +187,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.tailer = tailer
     app.state.geoip = geoip
     app.state.pipeline_running = True
+    app.state.error_pipeline = error_pipeline
 
     logger.info("AngelusVigil started — pipeline active")
 
@@ -142,7 +196,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.pipeline_running = False
     if tailer is not None:
         tailer.stop()
+    await app.state.label_watcher.stop()
     await pipeline.stop()
+    if error_pipeline is not None:
+        await error_pipeline.stop()
     geoip.close()
     await redis_manager.disconnect()
     await engine.dispose()

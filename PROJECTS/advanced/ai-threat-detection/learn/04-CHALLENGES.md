@@ -574,11 +574,11 @@ Stuck on a challenge?
 
 Track your progress:
 
-- [ ] Easy 1: Add XXE detection rule
-- [ ] Easy 2: Add method anomaly detection
-- [ ] Easy 3: Add country blocklist
-- [ ] Intermediate 4: Build active learning feedback loop
-- [ ] Intermediate 5: Add error log analysis
+- [x] Easy 1: Add XXE detection rule
+- [x] Easy 2: Add method anomaly detection
+- [x] Easy 3: Add country blocklist
+- [x] Intermediate 4: Build active learning feedback loop
+- [x] Intermediate 5: Add error log analysis
 - [ ] Intermediate 6: Add Prometheus metrics
 - [ ] Advanced 7: Add transformer model
 - [ ] Advanced 8: Build Kafka distributed pipeline

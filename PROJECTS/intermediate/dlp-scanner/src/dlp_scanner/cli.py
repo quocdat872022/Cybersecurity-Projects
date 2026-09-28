@@ -4,9 +4,6 @@ cli.py
 
 Challenge 4 addition: registers the ``cache`` sub-typer so that
 ``dlp-scan cache stats`` and ``dlp-scan cache clear`` are available.
-
-Challenge 8 addition: registers ``dlp-scan watch`` for real-time
-directory monitoring (see commands/watch.py).
 """
 
 

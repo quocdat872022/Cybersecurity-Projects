@@ -20,6 +20,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import {
   LuChevronLeft,
   LuChevronRight,
+  LuClipboardCheck,
   LuCpu,
   LuLayoutDashboard,
   LuMenu,
@@ -33,6 +34,7 @@ import styles from './shell.module.scss'
 const NAV_ITEMS = [
   { path: ROUTES.DASHBOARD, label: 'Dashboard', icon: LuLayoutDashboard },
   { path: ROUTES.THREATS, label: 'Threats', icon: LuShield },
+  { path: ROUTES.REVIEW, label: 'Review', icon: LuClipboardCheck },
   { path: ROUTES.MODELS, label: 'Models', icon: LuCpu },
 ]
 
