@@ -39,6 +39,7 @@ dependencies = [
     "typer>=0.23.0",
     "orjson>=3.11.7",
     "httpx>=0.28.1",
+    "prometheus-client>=0.21.0",
 ]
 
 [project.optional-dependencies]

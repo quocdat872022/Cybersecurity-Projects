@@ -124,6 +124,30 @@ services:
     networks:
       - vigil_dev
 
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "19090:9090"
+    networks:
+      - vigil_dev
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/vigil-dashboard.json:/var/lib/grafana/dashboards/vigil-dashboard.json:ro
+    ports:
+      - "13000:3000"
+    networks:
+      - vigil_dev
+    depends_on:
+      - prometheus
+    
+
 networks:
   vigil_dev:
     driver: bridge
@@ -137,3 +161,4 @@ volumes:
   frontend_node_modules_dev:
   geoip_data_dev:
     name: vigil_dev_geoip_data
+  
