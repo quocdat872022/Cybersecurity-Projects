@@ -6,12 +6,11 @@ Alert dispatcher routing scored threat events to storage,
 Redis pub/sub, and structured logging
 
 AlertDispatcher.dispatch receives a ScoredRequest from the
-pipeline, classifies severity via classify_severity,
-increments the vigil_threats_detected_total Prometheus
-counter for that severity, logs every event, and for
-MEDIUM+ severity persists to PostgreSQL via
-create_threat_event and publishes a WebSocketAlert JSON
-payload to the ALERTS_CHANNEL for real-time WebSocket relay
+pipeline, classifies severity via classify_severity, logs
+every event, and for MEDIUM+ severity persists to
+PostgreSQL via create_threat_event and publishes a
+WebSocketAlert JSON payload to the ALERTS_CHANNEL for
+real-time WebSocket relay
 
 Connects to:
   core/alerts/__init__ - ALERTS_CHANNEL
@@ -19,7 +18,6 @@ Connects to:
     ensemble           - classify_severity
   core/ingestion/
     pipeline           - ScoredRequest dataclass
-  core/metrics         - THREATS_DETECTED counter
   schemas/websocket    - WebSocketAlert model
   services/threat_
     service            - create_threat_event
@@ -36,7 +34,6 @@ from sqlalchemy.ext.asyncio import (
 from app.core.alerts import ALERTS_CHANNEL
 from app.core.detection.ensemble import classify_severity
 from app.core.ingestion.pipeline import ScoredRequest
-from app.core.metrics import THREATS_DETECTED  # Challenge 6
 from app.schemas.websocket import WebSocketAlert
 from app.services.threat_service import create_threat_event
 
@@ -67,7 +64,6 @@ class AlertDispatcher:
         dispatch stage
         """
         severity = classify_severity(scored.final_score)
-        THREATS_DETECTED.labels(severity=severity).inc()  # Challenge 6
 
         logger.info(
             "threat_event severity=%s score=%.2f mode=%s ip=%s path=%s rules=%s",
