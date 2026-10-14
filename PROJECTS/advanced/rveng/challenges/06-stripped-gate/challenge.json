@@ -1,0 +1,7 @@
+{
+  "id": "06-stripped-gate",
+  "module": "disassembly",
+  "title": "Gate in the dark",
+  "mission": "This binary is stripped: no symbol table, so there are no function names to look up. Discover the functions by their prologue, disassemble the one that checks a number, and read the constant it compares against. Answer in decimal or hex.",
+  "answer": { "category": "found_value", "expected": 1337 }
+}

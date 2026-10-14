@@ -1,0 +1,111 @@
+# =============================================================================
+# ©AngelaMos | 2026
+# justfile
+# =============================================================================
+
+set shell := ["bash", "-uc"]
+set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
+
+# =============================================================================
+# Default
+# =============================================================================
+
+default:
+    @just --list --unsorted
+
+# =============================================================================
+# Docker Compose (Development)
+# =============================================================================
+
+[group('dev')]
+dev-up *ARGS:
+    docker compose -f dev.compose.yml up {{ARGS}}
+
+[group('dev')]
+dev-start *ARGS:
+    docker compose -f dev.compose.yml up -d {{ARGS}}
+
+[group('dev')]
+dev-down *ARGS:
+    docker compose -f dev.compose.yml down {{ARGS}}
+
+[group('dev')]
+dev-stop:
+    docker compose -f dev.compose.yml stop
+
+[group('dev')]
+dev-build *ARGS:
+    docker compose -f dev.compose.yml build {{ARGS}}
+
+[group('dev')]
+dev-rebuild:
+    docker compose -f dev.compose.yml build --no-cache
+
+[group('dev')]
+dev-logs *SERVICE:
+    docker compose -f dev.compose.yml logs -f {{SERVICE}}
+
+[group('dev')]
+dev-ps:
+    docker compose -f dev.compose.yml ps
+
+# =============================================================================
+# Docker Compose (Production / self-host)
+# =============================================================================
+
+[group('prod')]
+up *ARGS:
+    docker compose up {{ARGS}}
+
+[group('prod')]
+start *ARGS:
+    docker compose up -d {{ARGS}}
+
+[group('prod')]
+down *ARGS:
+    docker compose down {{ARGS}}
+
+[group('prod')]
+stop:
+    docker compose stop
+
+[group('prod')]
+build *ARGS:
+    docker compose build {{ARGS}}
+
+[group('prod')]
+rebuild:
+    docker compose build --no-cache
+
+[group('prod')]
+logs *SERVICE:
+    docker compose logs -f {{SERVICE}}
+
+[group('prod')]
+ps:
+    docker compose ps
+
+# =============================================================================
+# Verify (one-shot, host, no long-lived servers)
+# =============================================================================
+
+[group('verify')]
+test:
+    uv run pytest -q
+
+[group('verify')]
+typecheck:
+    cd frontend && pnpm typecheck
+
+[group('verify')]
+lint:
+    cd frontend && pnpm biome check .
+
+# =============================================================================
+# Cleanup
+# =============================================================================
+
+[group('cleanup')]
+clean:
+    docker compose -f dev.compose.yml down -v
+    docker compose down -v

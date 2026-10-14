@@ -1,0 +1,139 @@
+// ===================
+// © AngelaMos | 2026
+// review.module.scss
+
+// CSS module for the active-learning review queue page
+
+// Styles a padded column flex page with a title/subtitle
+// header, a vertical stack of review cards (surface
+// background, muted border) each showing a header row
+// (method badge, monospace truncated path, tabular-nums
+// score), a meta row with source IP and matched rules, and
+// a two-button action row (green true-positive, red
+// false-positive) that dims on pending state. Includes
+// centered loading and empty states. Connects to
+// pages/review, styles/_index
+// ===================
+
+@use '@/styles' as *;
+
+.page {
+  padding: $space-6;
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $text-default;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: $font-size-sm;
+  color: $text-lighter;
+  margin: 0;
+}
+
+.loading,
+.empty {
+  @include flex-center;
+  height: 300px;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.card {
+  padding: $space-5;
+  background: $bg-surface-100;
+  border: 1px solid $border-muted;
+  border-radius: $radius-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.path {
+  flex: 1;
+  font-family: monospace;
+  font-size: $font-size-sm;
+  color: $text-default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  font-size: $font-size-sm;
+  color: $severity-medium;
+  font-variant-numeric: tabular-nums;
+  font-weight: $font-weight-medium;
+}
+
+.meta {
+  display: flex;
+  gap: $space-4;
+  font-size: $font-size-xs;
+  color: $text-lighter;
+
+  span:first-child {
+    font-family: monospace;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $space-3;
+}
+
+.truePositive,
+.falsePositive {
+  flex: 1;
+  padding: $space-2-5 $space-4;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  @include transition-fast;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.truePositive {
+  background: $severity-high-bg;
+  border: 1px solid $severity-high;
+  color: $severity-high;
+
+  @include hover {
+    background: $severity-high;
+    color: $white;
+  }
+}
+
+.falsePositive {
+  background: $severity-low-bg;
+  border: 1px solid $severity-low;
+  color: $severity-low;
+
+  @include hover {
+    background: $severity-low;
+    color: $white;
+  }
+}

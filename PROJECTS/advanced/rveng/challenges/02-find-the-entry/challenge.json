@@ -1,0 +1,7 @@
+{
+  "id": "02-find-the-entry",
+  "module": "elf-anatomy",
+  "title": "Find the entry point",
+  "mission": "Every ELF file records the virtual address where execution begins. Read the ELF header and find the entry point (the e_entry field). Answer in hex or decimal.",
+  "answer": { "category": "found_value", "expected": 4198496 }
+}

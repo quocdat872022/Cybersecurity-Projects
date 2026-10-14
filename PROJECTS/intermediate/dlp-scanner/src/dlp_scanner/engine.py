@@ -62,13 +62,45 @@ class ScanEngine:
                 frozenset(allowlist_vals) if allowlist_vals else None
             ),
             context_window_tokens = (detection.context_window_tokens),
+            custom_rules_dir = detection.custom_rules_dir or None,
         )
 
-    def scan_files(self, target: str) -> ScanResult:
+        # Log active severity overrides at startup so operators can confirm the policy is loaded correctly.
+        overrides = config.compliance.severity_overrides
+        if overrides:
+            log.info(
+                "compliance_severity_overrides_loaded",
+                overrides = overrides,
+            )
+        log.info(
+            "detector_registry_ready",
+            rule_count = self._registry.rule_count,
+            custom_rule_count = self._registry.custom_rule_count,
+        )
+
+    def scan_files(
+        self,
+        target: str,
+        *,
+        no_cache: bool = False,
+    ) -> ScanResult:
         """
-        Scan filesystem target for sensitive data
+        Scan filesystem target for sensitive data.
+
+        Parameters
+        ----------
+        target:
+            File or directory path to scan.
+        no_cache:
+            When True, bypass the hash cache and force a full rescan.
+            Results are still written back to the cache so future
+            incremental runs benefit.
         """
-        scanner = FileScanner(self._config, self._registry)
+        scanner = FileScanner(
+            self._config,
+            self._registry,
+            no_cache=no_cache,
+        )
         result = scanner.scan(target)
         log.info(
             "file_scan_complete",

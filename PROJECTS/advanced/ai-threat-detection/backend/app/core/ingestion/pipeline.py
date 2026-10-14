@@ -116,6 +116,7 @@ class Pipeline:
         rule_engine: RuleEngine,
         geoip: GeoIPService | None = None,
         on_result: (Callable[[ScoredRequest], Awaitable[None]] | None) = None,
+        on_parsed: Callable[[ParsedLogEntry], None] | None = None,
         inference_engine: InferenceEngine | None = None,
         ensemble_weights: dict[str, float] | None = None,
         raw_queue_size: int = 1000,
@@ -138,6 +139,7 @@ class Pipeline:
         self._rule_engine = rule_engine
         self._geoip = geoip
         self._on_result = on_result
+        self._on_parsed = on_parsed
         self._inference_engine = inference_engine
         self._ensemble_weights = ensemble_weights or DEFAULT_ENSEMBLE_WEIGHTS
         self._tasks: list[asyncio.Task[None]] = []
@@ -195,6 +197,8 @@ class Pipeline:
                 if entry is not None:
                     await self._parsed_queue.put(entry)
                     self._stats["parsed"] += 1
+                    if self._on_parsed is not None:
+                        self._on_parsed(entry)
             except Exception:
                 self._stats["parse_errors"] += 1
                 logger.exception("Parse error")

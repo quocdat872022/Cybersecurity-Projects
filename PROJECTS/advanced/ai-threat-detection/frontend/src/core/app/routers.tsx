@@ -31,6 +31,10 @@ const routes: RouteObject[] = [
         path: ROUTES.MODELS,
         lazy: () => import('@/pages/models'),
       },
+      {
+        path: ROUTES.REVIEW,
+        lazy: () => import('@/pages/review'),
+      },
     ],
   },
   {

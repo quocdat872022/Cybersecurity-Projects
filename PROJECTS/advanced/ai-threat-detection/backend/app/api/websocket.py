@@ -60,7 +60,7 @@ async def ws_alerts(websocket: WebSocket) -> None:
         try:
             while True:
                 await websocket.receive()
-        except WebSocketDisconnect:
+        except (WebSocketDisconnect, RuntimeError):
             pass
 
     relay_task = asyncio.create_task(_relay())
@@ -71,6 +71,11 @@ async def ws_alerts(websocket: WebSocket) -> None:
             [relay_task, receive_task],
             return_when=asyncio.FIRST_COMPLETED,
         )
+        for task in done:
+            if task.exception() is not None and not isinstance(
+                task.exception(), (WebSocketDisconnect, RuntimeError)
+            ):
+                logger.warning("Unexpected websocket task error", exc_info=task.exception())
         for task in pending:
             task.cancel()
     finally:

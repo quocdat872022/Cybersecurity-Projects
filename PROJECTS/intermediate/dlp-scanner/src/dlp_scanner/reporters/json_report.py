@@ -92,6 +92,7 @@ def _serialize_finding(
         "redacted_snippet": (finding.redacted_snippet),
         "compliance_frameworks": (finding.compliance_frameworks),
         "remediation": finding.remediation,
+        "column_signal": finding.column_signal,
         "detected_at": (finding.detected_at.isoformat()),
     }
 

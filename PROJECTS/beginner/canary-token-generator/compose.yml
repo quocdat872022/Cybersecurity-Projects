@@ -51,6 +51,7 @@ services:
       - GEOLITE_PATH=/data/GeoLite2-City.mmdb
       - WEBHOOK_HMAC_SECRET=${WEBHOOK_HMAC_SECRET:-}
       - MYSQL_FAKE_ENABLED=${MYSQL_FAKE_ENABLED:-false}
+      - TRUSTED_PROXY_CIDRS=${TRUSTED_PROXY_CIDRS:-}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - LOG_FORMAT=${LOG_FORMAT:-json}
       - OTEL_ENABLED=${OTEL_ENABLED:-false}

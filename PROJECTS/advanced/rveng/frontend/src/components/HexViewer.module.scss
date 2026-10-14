@@ -1,0 +1,108 @@
+// ===================
+// © AngelaMos | 2026
+// HexViewer.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.hex {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-4;
+}
+
+.pager {
+  display: flex;
+  gap: $space-2;
+
+  button {
+    padding: $space-1 $space-3;
+    font-size: $font-size-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-surface;
+    color: $color-text;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.range {
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  color: $color-text;
+}
+
+.total {
+  color: $color-text-muted;
+}
+
+.jump {
+  display: flex;
+  gap: $space-2;
+  margin-left: auto;
+
+  input {
+    width: 12rem;
+    padding: $space-1 $space-2;
+    font-family: $font-mono;
+    font-size: $font-size-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+  }
+
+  button {
+    padding: $space-1 $space-3;
+    font-size: $font-size-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-surface;
+    cursor: pointer;
+  }
+}
+
+.dump {
+  overflow-x: auto;
+  padding: $space-3;
+  background: $color-gray-900;
+  border-radius: $radius-md;
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+}
+
+.row {
+  display: flex;
+  gap: $space-4;
+  white-space: pre;
+}
+
+.gutter {
+  color: $color-gray-500;
+}
+
+.bytes {
+  color: $color-gray-100;
+}
+
+.ascii {
+  color: $color-gray-400;
+}
+
+.state {
+  padding: $space-4;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+}

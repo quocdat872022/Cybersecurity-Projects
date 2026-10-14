@@ -1,0 +1,39 @@
+# ©AngelaMos | 2026
+# compose.yml
+
+name: rveng
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.dockerfile
+    container_name: rveng-api
+    expose:
+      - "8000"
+    volumes:
+      - rveng_data:/app/data
+    networks:
+      - app
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: infra/docker/vite.prod
+    container_name: rveng-nginx
+    ports:
+      - "${NGINX_HOST_PORT:-8790}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - app
+    restart: unless-stopped
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  rveng_data:

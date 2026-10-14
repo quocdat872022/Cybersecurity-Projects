@@ -173,6 +173,7 @@ def _rebuild_result(
             ),
             remediation = f_data.get("remediation",
                                      ""),
+            column_signal = f_data.get("column_signal"),
         )
 
         if f_data.get("finding_id"):

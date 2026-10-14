@@ -27,6 +27,7 @@ dependencies = [
     "pymongo>=4.10.0",
     "aiosqlite>=0.21.0",
     "dpkt>=1.9.0",
+    "watchdog>=5.0.0",
 ]
 
 [project.scripts]

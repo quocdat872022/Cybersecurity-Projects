@@ -1,0 +1,7 @@
+{
+  "id": "01-read-the-hex",
+  "module": "hex-reading",
+  "title": "Read the hex",
+  "mission": "This binary hides a secret string in its read-only data. Open the hex viewer and read the ASCII column on the right to recover it. Submit the string exactly as it appears.",
+  "answer": { "category": "found_value", "expected": "the_flag_is_here" }
+}

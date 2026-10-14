@@ -1,0 +1,65 @@
+// ===================
+// © AngelaMos | 2026
+// MissionPanel.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-5;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.module {
+  font-size: $font-size-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $color-text-muted;
+}
+
+.solved {
+  padding: $space-1 $space-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-900;
+  background: $color-gray-200;
+  border-radius: $radius-full;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+}
+
+.mission {
+  color: $color-text;
+  line-height: $line-height-relaxed;
+}
+
+.meta {
+  display: flex;
+  gap: $space-3;
+  font-size: $font-size-sm;
+}
+
+.category {
+  padding: $space-1 $space-2;
+  color: $color-text;
+  background: $color-gray-100;
+  border-radius: $radius-sm;
+}
+
+.size {
+  color: $color-text-muted;
+}

@@ -20,9 +20,11 @@ Connects to:
 """
 
 import fakeredis.aioredis
+from unittest.mock import AsyncMock
 import pytest
 
 from app.core.detection.rules import RuleEngine
+from app.core.enrichment.geoip import GeoResult
 from app.core.ingestion.pipeline import Pipeline, ScoredRequest
 
 VALID_LINE = ("93.184.216.34 - - [11/Feb/2026:14:30:00 +0000] "
@@ -147,3 +149,27 @@ async def test_attack_line_scored_high() -> None:
     assert len(results) == 1
     assert results[0].rule_result.severity == "HIGH"
     assert "SQL_INJECTION" in results[0].rule_result.matched_rules
+
+async def test_pipeline_flags_blocked_country(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "blocked_countries", "CN")
+
+    redis = fakeredis.aioredis.FakeRedis(decode_responses=True)
+    geoip = AsyncMock()
+    geoip.lookup.return_value = GeoResult(country="CN", city=None, lat=None, lon=None)
+
+    results = []
+    pipeline = Pipeline(
+        redis_client=redis,
+        rule_engine=RuleEngine(),
+        geoip=geoip,
+        on_result=lambda sr: results.append(sr) or None,
+    )
+    await pipeline.start()
+
+    line = ('93.184.216.34 - - [11/Feb/2026:14:30:00 +0000] '
+            '"GET / HTTP/1.1" 200 100 "-" "Mozilla/5.0"')
+    await pipeline.raw_queue.put(line)
+    await pipeline.stop()
+
+    assert "COUNTRY_BLOCKED" in results[0].rule_result.matched_rules

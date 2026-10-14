@@ -1,0 +1,133 @@
+// ===================
+// © AngelaMos | 2026
+// DisasmPane.module.scss
+// ===================
+
+@use '../styles/tokens' as *;
+@use '../styles/fonts' as *;
+
+.disasm {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-4;
+}
+
+.picker {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+
+  select {
+    padding: $space-1 $space-2;
+    font-family: $font-mono;
+    font-size: $font-size-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-bg;
+  }
+}
+
+.gateBanner {
+  padding: $space-1 $space-3;
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  color: $color-gray-900;
+  background: $color-gray-200;
+  border: 1px solid $color-gray-400;
+  border-radius: $radius-sm;
+  cursor: pointer;
+}
+
+.listing {
+  overflow-x: auto;
+  padding: $space-2;
+  background: $color-gray-900;
+  border-radius: $radius-md;
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 6rem 9rem 4rem 1fr auto;
+  gap: $space-3;
+  align-items: center;
+  padding: $space-1 $space-2;
+  white-space: pre;
+  border-radius: $radius-sm;
+}
+
+.gate {
+  background: $color-gray-700;
+  outline: 1px solid $color-gray-400;
+}
+
+.addr {
+  color: $color-gray-500;
+}
+
+.raw {
+  color: $color-gray-600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mnemonic {
+  color: $color-white;
+  font-weight: $font-weight-semibold;
+}
+
+.ops {
+  color: $color-gray-300;
+}
+
+.callName {
+  color: $color-gray-100;
+  font-weight: $font-weight-semibold;
+}
+
+.dataRef {
+  color: $color-gray-500;
+}
+
+.callers {
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.target {
+  justify-self: end;
+  padding: 0 $space-2;
+  font-family: $font-mono;
+  font-size: $font-size-xs;
+  color: $color-gray-400;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: $radius-sm;
+}
+
+.linkable {
+  color: $color-gray-100;
+  border-color: $color-gray-600;
+  cursor: pointer;
+
+  &:hover {
+    background: $color-gray-800;
+  }
+}
+
+.state {
+  padding: $space-4;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+}

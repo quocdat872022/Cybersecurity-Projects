@@ -1,6 +1,12 @@
 """
 ©AngelaMos | 2026
 network_scanner.py
+
+Challenge 5 change summary
+---------------------------
+``NetworkScanner`` now stores ``config.compliance`` and passes it to
+:func:`~dlp_scanner.scoring.match_to_finding` inside
+``_scan_reassembled_flows``.  No detection logic is changed.
 """
 
 
@@ -9,7 +15,7 @@ from pathlib import Path
 
 import structlog
 
-from dlp_scanner.config import ScanConfig
+from dlp_scanner.config import ScanConfig, ComplianceConfig
 from dlp_scanner.detectors.registry import DetectorRegistry
 from dlp_scanner.models import (
     Finding,
@@ -75,7 +81,8 @@ class NetworkScanner:
         self._detection_config = config.detection
         self._redaction_style = config.output.redaction_style
         self._registry = registry
-
+        # Challenge 5: store compliance config for severity override
+        self._compliance_config: ComplianceConfig = config.compliance
     def scan(self, target: str) -> ScanResult:
         """
         Scan a PCAP file for sensitive data in payloads
@@ -137,10 +144,10 @@ class NetworkScanner:
                     packet.payload,
                     packet.src_ip,
                     packet.dst_ip,
-                    path,
-                    packet_count,
-                    dns_detector,
-                    result,
+                    path = path,
+                    packet_num = packet_count,
+                    dns_detector = dns_detector,
+                    result = result,
                 )
 
             if packet.payload:
@@ -175,6 +182,7 @@ class NetworkScanner:
         payload: bytes,
         src_ip: str,
         dst_ip: str,
+        *,
         path: Path,
         packet_num: int,
         dns_detector: DnsExfilDetector,
@@ -248,6 +256,7 @@ class NetworkScanner:
                     text,
                     location,
                     self._redaction_style,
+                    compliance_config = self._compliance_config,
                 )
                 result.findings.append(finding)
 

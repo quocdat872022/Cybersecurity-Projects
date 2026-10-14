@@ -41,6 +41,6 @@ USER axumortem
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD ["/usr/local/bin/axumortem", "--help"] || exit 1
+    CMD ["/usr/local/bin/axumortem", "--help"]
 
 ENTRYPOINT ["/usr/local/bin/axumortem"]

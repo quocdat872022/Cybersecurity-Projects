@@ -279,3 +279,28 @@ def test_open_redirect() -> None:
     result = ENGINE.score_request(_empty_windowed(), entry)
     assert "OPEN_REDIRECT" in result.matched_rules
     assert result.threat_score >= 0.5
+
+def test_country_blocklist(monkeypatch) -> None:
+    """
+    Requests from a blocked country trigger COUNTRY_BLOCKED.
+    """
+    from app.config import settings
+    monkeypatch.setattr(settings, "blocked_countries", "CN,RU")
+
+    features = _empty_windowed()
+    features["country_code"] = "CN"
+    result = ENGINE.score_request(features, _make_entry())
+
+    assert "COUNTRY_BLOCKED" in result.matched_rules
+    assert result.component_scores["COUNTRY_BLOCKED"] == 0.25
+    assert result.threat_score >= 0.25
+
+
+def test_country_not_blocked_by_default() -> None:
+    """
+    Without a configured blocklist, no country ever triggers the rule.
+    """
+    features = _empty_windowed()
+    features["country_code"] = "CN"
+    result = ENGINE.score_request(features, _make_entry())
+    assert "COUNTRY_BLOCKED" not in result.matched_rules
