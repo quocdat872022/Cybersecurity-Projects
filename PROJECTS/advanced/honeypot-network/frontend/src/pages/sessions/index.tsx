@@ -9,6 +9,13 @@ import styles from './sessions.module.scss'
 
 const PAGE_SIZE = 50
 
+function scoreClass(score: number): string {
+  if (score > 75) return styles.scoreCritical ?? ''
+  if (score > 50) return styles.scoreHigh ?? ''
+  if (score > 25) return styles.scoreMedium ?? ''
+  return styles.scoreLow ?? ''
+}
+
 export function SessionsPage() {
   const [offset, setOffset] = useState(0)
   const { data, isLoading } = useSessions(PAGE_SIZE, offset)
@@ -62,7 +69,9 @@ export function SessionsPage() {
                     <td>{s.source_ip}</td>
                     <td>{s.username || '\u2014'}</td>
                     <td>{s.command_count}</td>
-                    <td className={styles.threat}>{s.threat_score}</td>
+                    <td className={scoreClass(s.threat_score)}>
+                      {s.threat_score}
+                    </td>
                     <td>{new Date(s.started_at).toLocaleString()}</td>
                     <td>{duration !== null ? `${duration}s` : 'active'}</td>
                   </tr>

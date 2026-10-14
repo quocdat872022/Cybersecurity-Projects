@@ -35,8 +35,10 @@ import (
 	"github.com/CarterPerez-dev/hive/internal/redisd"
 	"github.com/CarterPerez-dev/hive/internal/session"
 	"github.com/CarterPerez-dev/hive/internal/smbd"
+	"github.com/CarterPerez-dev/hive/internal/smtpd"
 	"github.com/CarterPerez-dev/hive/internal/sshd"
 	"github.com/CarterPerez-dev/hive/internal/store"
+	"github.com/CarterPerez-dev/hive/internal/telnetd"
 	"github.com/CarterPerez-dev/hive/internal/ui"
 	"github.com/CarterPerez-dev/hive/pkg/types"
 )
@@ -94,7 +96,7 @@ func runServe(ctx context.Context) error {
 	}
 	defer func() { _ = redisStreamer.Close() }()
 
-	geoLookup, err := geo.NewLookup(cfg.GeoIP.DBPath)
+	geoLookup, err := geo.NewLookup(cfg.GeoIP.DBPath, cfg.GeoIP.ASNDBPath)
 	if err != nil {
 		return fmt.Errorf("loading geoip database: %w", err)
 	}
@@ -123,6 +125,7 @@ func runServe(ctx context.Context) error {
 		redisStreamer,
 		geoLookup,
 		detector,
+		tracker,
 		logger,
 	)
 
@@ -259,6 +262,22 @@ func buildServices(
 	if cfg.Redis.Enabled {
 		services = append(services,
 			redisd.New(
+				cfg, bus, logger, tracker, limiter,
+			),
+		)
+	}
+
+	if cfg.Telnet.Enabled {
+		services = append(services,
+			telnetd.New(
+				cfg, bus, logger, tracker, limiter,
+			),
+		)
+	}
+
+	if cfg.SMTP.Enabled {
+		services = append(services,
+			smtpd.New(
 				cfg, bus, logger, tracker, limiter,
 			),
 		)

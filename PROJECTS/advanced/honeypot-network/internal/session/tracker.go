@@ -19,6 +19,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/CarterPerez-dev/hive/internal/scoring"
 	"github.com/CarterPerez-dev/hive/pkg/types"
 )
 
@@ -86,6 +87,13 @@ func (t *Tracker) End(sessionID string) *types.Session {
 
 	now := time.Now().UTC()
 	sess.EndedAt = &now
+
+	if now.Sub(sess.StartedAt) > scoring.LongSessionThreshold {
+		sess.ThreatScore = scoring.Cap(
+			sess.ThreatScore + scoring.WeightLongSession,
+		)
+	}
+
 	delete(t.sessions, sessionID)
 	onEnd := t.onEnd
 	t.mu.Unlock()
@@ -139,9 +147,43 @@ func (t *Tracker) SetLogin(
 	}
 }
 
+// AddTechnique records a MITRE technique on the session if it hasn't
+// already been seen, awarding threat-score points for the first
+// sighting of each unique technique. Returns true if this was a new
+// technique for the session.
 func (t *Tracker) AddTechnique(
 	sessionID, techniqueID string,
-) {
+) bool {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	sess, exists := t.sessions[sessionID]
+	if !exists {
+		return false
+	}
+
+	for _, tid := range sess.MITRETechniques {
+		if tid == techniqueID {
+			return false
+		}
+	}
+
+	sess.MITRETechniques = append(
+		sess.MITRETechniques, techniqueID,
+	)
+	sess.ThreatScore = scoring.Cap(
+		sess.ThreatScore + scoring.WeightMITRETechnique,
+	)
+	return true
+}
+
+// AddScore adds points to the session's threat score, clamping the
+// result to [0, scoring.MaxScore].
+func (t *Tracker) AddScore(sessionID string, points int) {
+	if points == 0 {
+		return
+	}
+
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -150,14 +192,7 @@ func (t *Tracker) AddTechnique(
 		return
 	}
 
-	for _, t := range sess.MITRETechniques {
-		if t == techniqueID {
-			return
-		}
-	}
-	sess.MITRETechniques = append(
-		sess.MITRETechniques, techniqueID,
-	)
+	sess.ThreatScore = scoring.Cap(sess.ThreatScore + points)
 }
 
 func (t *Tracker) Count() int {

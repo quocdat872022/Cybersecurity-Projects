@@ -55,6 +55,14 @@ type credentialStats struct {
 	TopPairs     []credentialPair  `json:"top_pairs"`
 }
 
+type trendingCredentialEntry struct {
+	Username    string  `json:"username"`
+	Password    string  `json:"password"`
+	RecentCount int64   `json:"recent_count"`
+	PriorCount  int64   `json:"prior_count"`
+	GrowthRatio float64 `json:"growth_ratio"`
+}
+
 type credentialEntry struct {
 	Value string `json:"value"`
 	Count int64  `json:"count"`
@@ -248,6 +256,40 @@ func (s *Server) handleStatsCredentials(
 	})
 }
 
+func (s *Server) handleStatsCredentialsTrending(
+	w http.ResponseWriter, r *http.Request,
+) {
+	ctx := r.Context()
+
+	trending, err := s.store.TrendingCredentials(
+		ctx, defaultTrendingTop,
+	)
+	if err != nil {
+		s.writeError(
+			w, http.StatusInternalServerError,
+			"failed to query trending credentials",
+		)
+		return
+	}
+
+	entries := make(
+		[]trendingCredentialEntry, len(trending),
+	)
+	for i, t := range trending {
+		entries[i] = trendingCredentialEntry{
+			Username:    t.Username,
+			Password:    t.Password,
+			RecentCount: t.RecentCount,
+			PriorCount:  t.PriorCount,
+			GrowthRatio: t.GrowthRatio,
+		}
+	}
+
+	s.writeJSON(w, http.StatusOK, apiResponse{
+		Data: entries,
+	})
+}
+
 func (s *Server) handleEvents(
 	w http.ResponseWriter, r *http.Request,
 ) {
@@ -293,9 +335,10 @@ func (s *Server) handleSessions(
 	ctx := r.Context()
 	limit, offset := parsePagination(r)
 	service := r.URL.Query().Get("service")
+	minScore := parseMinScore(r)
 
 	sessions, total, err := s.store.ListSessions(
-		ctx, service, limit, offset,
+		ctx, service, minScore, limit, offset,
 	)
 	if err != nil {
 		s.writeError(
@@ -612,6 +655,12 @@ func (s *Server) handleSensors(
 	if s.cfg.Redis.Enabled {
 		services = append(services, "redis")
 	}
+	if s.cfg.Telnet.Enabled {
+		services = append(services, "telnet")
+	}
+	if s.cfg.SMTP.Enabled {
+		services = append(services, "smtp")
+	}
 
 	sensor := sensorInfo{
 		ID:        s.cfg.Sensor.ID,
@@ -648,6 +697,18 @@ func parsePagination(r *http.Request) (int, int) {
 	}
 
 	return limit, offset
+}
+
+func parseMinScore(r *http.Request) int {
+	v := r.URL.Query().Get("min_score")
+	if v == "" {
+		return 0
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil || n < 0 {
+		return 0
+	}
+	return n
 }
 
 func parseDuration(r *http.Request) time.Duration {

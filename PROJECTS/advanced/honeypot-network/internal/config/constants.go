@@ -21,22 +21,26 @@ const (
 )
 
 const (
-	DefaultSSHPort   = 2222
-	DefaultHTTPPort  = 8080
-	DefaultFTPPort   = 2121
-	DefaultSMBPort   = 4450
-	DefaultMySQLPort = 3307
-	DefaultRedisPort = 6380
-	DefaultAPIPort   = 8000
+	DefaultSSHPort    = 2222
+	DefaultHTTPPort   = 8080
+	DefaultFTPPort    = 2121
+	DefaultSMBPort    = 4450
+	DefaultMySQLPort  = 3307
+	DefaultRedisPort  = 6380
+	DefaultTelnetPort = 2333
+	DefaultSMTPPort   = 2525
+	DefaultAPIPort    = 8000
 )
 
 const (
-	SSHBanner   = "SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5"
-	HTTPServer  = "Apache/2.4.57 (Ubuntu)"
-	FTPBanner   = "220 ProFTPD 1.3.8b Server ready."
-	MySQLBanner = "5.7.42-0ubuntu0.18.04.1"
-	RedisBanner = "7.0.11"
-	SMBDialect  = "SMB 2.1"
+	SSHBanner    = "SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5"
+	HTTPServer   = "Apache/2.4.57 (Ubuntu)"
+	FTPBanner    = "220 ProFTPD 1.3.8b Server ready."
+	MySQLBanner  = "5.7.42-0ubuntu0.18.04.1"
+	RedisBanner  = "7.0.11"
+	SMBDialect   = "SMB 2.1"
+	TelnetBanner = "Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-105-generic x86_64)"
+	SMTPBanner   = "220 mail.internal.local ESMTP Postfix (Ubuntu)"
 )
 
 const (
@@ -55,6 +59,24 @@ const SSHMOTDTemplate = "Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-105-gen
 	"  Memory usage: 28%%               IPv4 address for eth0: 10.0.2.15\r\n" +
 	"  Swap usage:   0%%\r\n\r\n" +
 	"Last login: %s from 10.0.2.2\r\n"
+
+const TelnetMOTDTemplate = "Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 6.8.0-111-generic x86_64)\r\n" +
+	"\r\n" +
+	" * Documentation:  https://help.ubuntu.com\r\n" +
+	" * Management:     https://landscape.canonical.com\r\n" +
+	" * Support:        https://ubuntu.com/advantage\r\n" +
+	"\r\n" +
+	"Expanded Security Maintenance for Applications is not enabled.\r\n" +
+	"\r\n" +
+	"%d updates can be applied immediately.\r\n" +
+	"%d of these updates is a standard security update.\r\n" +
+	"To see these additional updates run: apt list --upgradable\r\n" +
+	"\r\n" +
+	"5 additional security updates can be applied with ESM Apps.\r\n" +
+	"Learn more about enabling ESM Apps service at https://ubuntu.com/esm\r\n" +
+	"\r\n" +
+	"*** System restart required ***\r\n" +
+	"Last login: %s from %s on pts/%d\r\n"
 
 const SchemaVersion = 1
 
@@ -91,10 +113,11 @@ const (
 )
 
 const (
-	DefaultReplayDir   = "/data/replays"
-	DefaultGeoIPPath   = "/usr/share/GeoIP/GeoLite2-City.mmdb"
-	DefaultHostKeyPath = "data/hostkey_ed25519"
-	DefaultConfigPath  = "config.yaml"
+	DefaultReplayDir    = "/data/replays"
+	DefaultGeoIPPath    = "/usr/share/GeoIP/GeoLite2-City.mmdb"
+	DefaultGeoIPASNPath = "/usr/share/GeoIP/GeoLite2-ASN.mmdb"
+	DefaultHostKeyPath  = "data/hostkey_ed25519"
+	DefaultConfigPath   = "config.yaml"
 )
 
 const (

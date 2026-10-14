@@ -2,12 +2,13 @@
 ©AngelaMos | 2026
 lookup.go
 
-GeoIP resolution using MaxMind GeoLite2 database
+GeoIP resolution using MaxMind GeoLite2 databases
 
-Resolves IP addresses to geographic location, ASN, and organization.
-Returns a zero-value GeoInfo gracefully when the database file is
-missing, allowing the system to operate without a MaxMind account
-during local development.
+Resolves IP addresses to geographic location (GeoLite2-City) and
+ASN/organization (GeoLite2-ASN). Both databases are optional and
+independent — if either file is missing, that portion of GeoInfo
+is left zero-valued rather than failing the whole lookup, allowing
+the system to operate without a MaxMind account during local dev.
 */
 
 package geo
@@ -15,13 +16,14 @@ package geo
 import (
 	"fmt"
 	"net"
+	"os"
 
 	"github.com/oschwald/maxminddb-golang"
 
 	"github.com/CarterPerez-dev/hive/pkg/types"
 )
 
-type mmdbRecord struct {
+type cityRecord struct {
 	Country struct {
 		ISOCode string            `maxminddb:"iso_code"`
 		Names   map[string]string `maxminddb:"names"`
@@ -33,28 +35,43 @@ type mmdbRecord struct {
 		Latitude  float64 `maxminddb:"latitude"`
 		Longitude float64 `maxminddb:"longitude"`
 	} `maxminddb:"location"`
-	Traits struct {
-		AutonomousSystemNumber       int    `maxminddb:"autonomous_system_number"`
-		AutonomousSystemOrganization string `maxminddb:"autonomous_system_organization"`
-	} `maxminddb:"traits"`
+}
+
+type asnRecord struct {
+	AutonomousSystemNumber       int    `maxminddb:"autonomous_system_number"`
+	AutonomousSystemOrganization string `maxminddb:"autonomous_system_organization"`
 }
 
 type Lookup struct {
-	reader *maxminddb.Reader
+	city *maxminddb.Reader
+	asn  *maxminddb.Reader
 }
 
-func NewLookup(dbPath string) (*Lookup, error) {
-	reader, _ := maxminddb.Open(dbPath)
-	return &Lookup{reader: reader}, nil
+// NewLookup opens the City and ASN databases independently. A missing
+// or unreadable file for either is not an error — Resolve simply
+// won't populate those fields, matching the previous zero-value
+// fallback behavior for local dev without a MaxMind account.
+func NewLookup(cityPath, asnPath string) (*Lookup, error) {
+	l := &Lookup{}
+
+	if city, err := maxminddb.Open(cityPath); err != nil {
+		fmt.Fprintf(os.Stderr, "geoip: city db unavailable at %s: %v\n", cityPath, err)
+	} else {
+		l.city = city
+	}
+
+	if asn, err := maxminddb.Open(asnPath); err != nil {
+		fmt.Fprintf(os.Stderr, "geoip: asn db unavailable at %s: %v\n", asnPath, err)
+	} else {
+		l.asn = asn
+	}
+
+	return l, nil
 }
 
 func (l *Lookup) Resolve(
 	ip string,
 ) (*types.GeoInfo, error) {
-	if l.reader == nil {
-		return &types.GeoInfo{}, nil
-	}
-
 	parsed := net.ParseIP(ip)
 	if parsed == nil {
 		return nil, fmt.Errorf("invalid ip: %s", ip)
@@ -64,26 +81,43 @@ func (l *Lookup) Resolve(
 		return &types.GeoInfo{}, nil
 	}
 
-	var record mmdbRecord
-	err := l.reader.Lookup(parsed, &record)
-	if err != nil {
-		return nil, fmt.Errorf("geoip lookup: %w", err)
+	info := &types.GeoInfo{}
+
+	if l.city != nil {
+		var rec cityRecord
+		if err := l.city.Lookup(parsed, &rec); err != nil {
+			return nil, fmt.Errorf("city lookup: %w", err)
+		}
+		info.CountryCode = rec.Country.ISOCode
+		info.Country = rec.Country.Names["en"]
+		info.City = rec.City.Names["en"]
+		info.Latitude = rec.Location.Latitude
+		info.Longitude = rec.Location.Longitude
 	}
 
-	return &types.GeoInfo{
-		CountryCode: record.Country.ISOCode,
-		Country:     record.Country.Names["en"],
-		City:        record.City.Names["en"],
-		Latitude:    record.Location.Latitude,
-		Longitude:   record.Location.Longitude,
-		ASN:         record.Traits.AutonomousSystemNumber,
-		Org:         record.Traits.AutonomousSystemOrganization,
-	}, nil
+	if l.asn != nil {
+		var rec asnRecord
+		if err := l.asn.Lookup(parsed, &rec); err != nil {
+			return nil, fmt.Errorf("asn lookup: %w", err)
+		}
+		info.ASN = rec.AutonomousSystemNumber
+		info.Org = rec.AutonomousSystemOrganization
+	}
+
+	return info, nil
 }
 
 func (l *Lookup) Close() error {
-	if l.reader != nil {
-		return l.reader.Close()
+	var firstErr error
+	if l.city != nil {
+		if err := l.city.Close(); err != nil {
+			firstErr = err
+		}
 	}
-	return nil
+	if l.asn != nil {
+		if err := l.asn.Close(); err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
+	return firstErr
 }

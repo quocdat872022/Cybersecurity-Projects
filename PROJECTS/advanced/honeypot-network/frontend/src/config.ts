@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     OVERVIEW: '/stats/overview',
     COUNTRIES: '/stats/countries',
     CREDENTIALS: '/stats/credentials',
+    CREDENTIALS_TRENDING: '/stats/credentials/trending',
   },
   EVENTS: {
     LIST: '/events',
@@ -44,6 +45,8 @@ export const QUERY_KEYS = {
     COUNTRIES: (since: string) =>
       [...QUERY_KEYS.STATS.ALL, 'countries', since] as const,
     CREDENTIALS: () => [...QUERY_KEYS.STATS.ALL, 'credentials'] as const,
+    CREDENTIALS_TRENDING: () =>
+    [...QUERY_KEYS.STATS.ALL, 'credentials', 'trending'] as const,
   },
   EVENTS: {
     ALL: ['events'] as const,
@@ -126,6 +129,8 @@ export const SERVICE_LABELS: Record<string, string> = {
   smb: 'SMB',
   mysql: 'MySQL',
   redis: 'Redis',
+  telnet: 'Telnet',
+  smtp: 'SMTP'
 }
 
 export const BLOCKLIST_FORMATS = ['plain', 'iptables', 'nginx', 'csv'] as const

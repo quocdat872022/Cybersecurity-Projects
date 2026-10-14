@@ -168,3 +168,25 @@ func TestConcurrentAccess(t *testing.T) {
 
 	assert.Equal(t, 0, tr.Count())
 }
+
+func TestAddScoreCapsAt100(t *testing.T) {
+	tr := NewTracker()
+	sess := tr.Start("sensor-01", types.ServiceSSH, "10.0.0.1", 100, 22)
+
+	tr.AddScore(sess.ID, 60)
+	tr.AddScore(sess.ID, 60)
+
+	got := tr.Get(sess.ID)
+	assert.Equal(t, 100, got.ThreatScore)
+}
+
+func TestAddTechniqueOnlyScoresOnce(t *testing.T) {
+	tr := NewTracker()
+	sess := tr.Start("sensor-01", types.ServiceSSH, "10.0.0.1", 100, 22)
+
+	first := tr.AddTechnique(sess.ID, "T1110")
+	second := tr.AddTechnique(sess.ID, "T1110")
+
+	assert.True(t, first)
+	assert.False(t, second)
+}

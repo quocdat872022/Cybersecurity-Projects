@@ -128,6 +128,8 @@ func (s *FTPService) handleConnection(
 
 		result := fc.dispatch(cmd, arg)
 
+		s.tracker.IncrCommandCount(sess.ID)
+
 		s.publishCommand(
 			sess.ID, srcIP, cmd, arg,
 		)

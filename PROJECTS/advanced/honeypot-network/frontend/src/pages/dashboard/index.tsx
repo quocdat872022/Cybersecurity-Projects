@@ -14,6 +14,7 @@ import {
   useStatsCountries,
   useStatsCredentials,
   useStatsOverview,
+  useTrendingCredentials,
 } from '@/api/hooks'
 import { AttackMap } from '@/components/attack-map'
 import { EventFeed } from '@/components/event-feed'
@@ -36,6 +37,7 @@ export function DashboardPage() {
   const { data: stats } = useStatsOverview()
   const { data: countries } = useStatsCountries()
   const { data: credentials } = useStatsCredentials()
+  const { data: trending } = useTrendingCredentials()
   const { data: attackers } = useAttackers()
   const wsEventCount = useWebSocketStore((s) => s.eventCount)
 
@@ -155,6 +157,29 @@ export function DashboardPage() {
                 <div key={p.value} className={styles.listRow}>
                   <span className={styles.listLabel}>{p.value}</span>
                   <span className={styles.listValue}>{p.count}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {trending && trending.length > 0 && (
+        <div className={styles.row}>
+          <section className={styles.panel}>
+            <h2 className={styles.panelLabel}>Trending Credentials</h2>
+            <div className={styles.list}>
+              {trending.map((t) => (
+                <div
+                  key={`${t.username}:${t.password}`}
+                  className={styles.listRow}
+                >
+                  <span className={styles.listLabel}>
+                    {t.username}:{t.password}
+                  </span>
+                  <span className={styles.listValue}>
+                    {t.growth_ratio.toFixed(1)}x ({t.recent_count})
+                  </span>
                 </div>
               ))}
             </div>

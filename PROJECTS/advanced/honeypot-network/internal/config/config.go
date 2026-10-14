@@ -31,6 +31,8 @@ type Config struct {
 	SMB      SMBConfig      `yaml:"smb"`
 	MySQL    MySQLConfig    `yaml:"mysql"`
 	Redis    RedisConfig    `yaml:"redis"`
+	Telnet   TelnetConfig   `yaml:"telnet"`
+	SMTP     SMTPConfig     `yaml:"smtp"`
 	Database DatabaseConfig `yaml:"database"`
 	Stream   StreamConfig   `yaml:"stream"`
 	API      APIConfig      `yaml:"api"`
@@ -84,6 +86,20 @@ type RedisConfig struct {
 	ServerVersion string `yaml:"server_version"`
 }
 
+type TelnetConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	Port     int    `yaml:"port"`
+	Banner   string `yaml:"banner"`
+	Hostname string `yaml:"hostname"`
+}
+
+type SMTPConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	Port     int    `yaml:"port"`
+	Banner   string `yaml:"banner"`
+	Hostname string `yaml:"hostname"`
+}
+
 type DatabaseConfig struct {
 	DSN            string        `yaml:"dsn"`
 	PoolMin        int           `yaml:"pool_min"`
@@ -108,7 +124,8 @@ type APIConfig struct {
 }
 
 type GeoIPConfig struct {
-	DBPath string `yaml:"db_path"`
+	DBPath    string `yaml:"db_path"`
+	ASNDBPath string `yaml:"asn_db_path"`
 }
 
 type LogConfig struct {
@@ -161,8 +178,20 @@ func Default() *Config {
 			Port:          DefaultRedisPort,
 			ServerVersion: RedisBanner,
 		},
+		Telnet: TelnetConfig{
+			Enabled:  true,
+			Port:     DefaultTelnetPort,
+			Banner:   TelnetBanner,
+			Hostname: DefaultHostname,
+		},
+		SMTP: SMTPConfig{
+			Enabled:  true,
+			Port:     DefaultSMTPPort,
+			Banner:   SMTPBanner,
+			Hostname: DefaultHostname,
+		},
 		Database: DatabaseConfig{
-			DSN:            "postgres://hive:hive@localhost:5432/hive?sslmode=disable",
+			DSN:            "postgres://hive:hive@localhost:53743/hive?sslmode=disable",
 			PoolMin:        DefaultDBPoolMin,
 			PoolMax:        DefaultDBPoolMax,
 			ConnTimeout:    DefaultDBTimeout,
@@ -170,7 +199,7 @@ func Default() *Config {
 			MigrationsPath: "migrations",
 		},
 		Stream: StreamConfig{
-			URL:       "redis://localhost:16379",
+			URL:       "redis://localhost:16329",
 			StreamKey: DefaultRedisStreamKey,
 			MaxLen:    DefaultRedisMaxLen,
 		},
@@ -184,7 +213,8 @@ func Default() *Config {
 			WriteTimeout: DefaultWriteTimeout,
 		},
 		GeoIP: GeoIPConfig{
-			DBPath: DefaultGeoIPPath,
+			DBPath:    DefaultGeoIPPath,
+			ASNDBPath: DefaultGeoIPASNPath,
 		},
 		Log: LogConfig{
 			Level:      "info",
@@ -234,6 +264,9 @@ func applyEnvOverrides(cfg *Config) {
 	if v := os.Getenv("HIVE_GEOIP_DB_PATH"); v != "" {
 		cfg.GeoIP.DBPath = v
 	}
+	if v := os.Getenv("HIVE_GEOIP_ASN_DB_PATH"); v != "" {
+		cfg.GeoIP.ASNDBPath = v
+	}
 	if v := os.Getenv("HIVE_LOG_LEVEL"); v != "" {
 		cfg.Log.Level = v
 	}
@@ -250,6 +283,10 @@ func applyEnvOverrides(cfg *Config) {
 	applyPortOverride("HIVE_SMB_PORT", &cfg.SMB.Port)
 	applyPortOverride("HIVE_MYSQL_PORT", &cfg.MySQL.Port)
 	applyPortOverride("HIVE_REDIS_PORT", &cfg.Redis.Port)
+	applyPortOverride("HIVE_TELNET_PORT", &cfg.Telnet.Port)
+	applyBoolOverride("HIVE_TELNET_ENABLED", &cfg.Telnet.Enabled)
+	applyPortOverride("HIVE_SMTP_PORT", &cfg.SMTP.Port)
+	applyBoolOverride("HIVE_SMTP_ENABLED", &cfg.SMTP.Enabled)
 	applyPortOverride("HIVE_API_PORT", &cfg.API.Port)
 
 	applyBoolOverride("HIVE_SSH_ENABLED", &cfg.SSH.Enabled)

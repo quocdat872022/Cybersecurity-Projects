@@ -55,6 +55,7 @@ type SessionRepository interface {
 	ListSessions(
 		ctx context.Context,
 		service string,
+		minScore int,
 		limit, offset int,
 	) ([]*types.Session, int64, error)
 	ActiveSessions(
@@ -91,6 +92,9 @@ type CredentialRepository interface {
 	TopPairs(
 		ctx context.Context, limit int,
 	) ([]CredentialPairCount, error)
+	TrendingCredentials(
+		ctx context.Context, limit int,
+	) ([]TrendingCredential, error)
 }
 
 type IOCRepository interface {
@@ -121,6 +125,18 @@ type CredentialPairCount struct {
 	Username string
 	Password string
 	Count    int64
+}
+
+// TrendingCredential compares credential-pair volume in the most
+// recent 6-hour window against the preceding 6-hour window. A pair
+// seen only in the recent window (PriorCount == 0) is treated as
+// maximally trending — GrowthRatio equals RecentCount in that case.
+type TrendingCredential struct {
+	Username    string
+	Password    string
+	RecentCount int64
+	PriorCount  int64
+	GrowthRatio float64
 }
 
 type TechniqueCount struct {

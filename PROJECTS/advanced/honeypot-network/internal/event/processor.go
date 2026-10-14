@@ -16,13 +16,15 @@ package event
 import (
 	"context"
 	"encoding/json"
-	"net"
 	"time"
 
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/CarterPerez-dev/hive/internal/config"
+	"github.com/CarterPerez-dev/hive/internal/intel"
+	"github.com/CarterPerez-dev/hive/internal/scoring"
+	"github.com/CarterPerez-dev/hive/internal/session"
 	"github.com/CarterPerez-dev/hive/pkg/types"
 )
 
@@ -47,14 +49,16 @@ type EventStreamer interface {
 }
 
 type Processor struct {
-	workers  int
-	bus      *Bus
-	store    DataStore
-	streamer EventStreamer
-	geo      GeoResolver
-	detector TechniqueDetector
-	logger   zerolog.Logger
-	eventCh  <-chan *types.Event
+	workers   int
+	bus       *Bus
+	store     DataStore
+	streamer  EventStreamer
+	geo       GeoResolver
+	detector  TechniqueDetector
+	extractor *intel.Extractor
+	tracker   *session.Tracker
+	logger    zerolog.Logger
+	eventCh   <-chan *types.Event
 }
 
 func NewProcessor(
@@ -64,6 +68,7 @@ func NewProcessor(
 	streamer EventStreamer,
 	geo GeoResolver,
 	detector TechniqueDetector,
+	tracker *session.Tracker,
 	logger zerolog.Logger,
 ) *Processor {
 	ch := bus.Subscribe(
@@ -72,14 +77,16 @@ func NewProcessor(
 	)
 
 	return &Processor{
-		workers:  workers,
-		bus:      bus,
-		store:    store,
-		streamer: streamer,
-		geo:      geo,
-		detector: detector,
-		logger:   logger,
-		eventCh:  ch,
+		workers:   workers,
+		bus:       bus,
+		store:     store,
+		streamer:  streamer,
+		geo:       geo,
+		detector:  detector,
+		extractor: intel.NewExtractor(),
+		tracker:   tracker,
+		logger:    logger,
+		eventCh:   ch,
 	}
 }
 
@@ -117,6 +124,7 @@ func (p *Processor) process(
 
 	p.enrichGeo(ev)
 	detections := p.detectTechniques(ev)
+	p.scoreEvent(ev, detections)
 	p.persist(ctx, ev, detections)
 	p.stream(ctx, ev)
 }
@@ -150,6 +158,27 @@ func (p *Processor) detectTechniques(
 		ev.Tags = append(ev.Tags, d.TechniqueID)
 	}
 	return detections
+}
+
+// scoreEvent updates the in-memory session's threat score: single-event
+// classification (auth attempts, discovery/transfer/persistence
+// commands) plus one-time credit for each newly detected MITRE
+// technique. The score is finalized and persisted when the session's
+// tracker.End() fires, via the existing SetOnEnd -> UpdateSession wiring.
+func (p *Processor) scoreEvent(
+	ev *types.Event, detections []*types.MITREDetection,
+) {
+	if p.tracker == nil || ev.SessionID == "" {
+		return
+	}
+
+	if points := scoring.ScoreEvent(ev); points > 0 {
+		p.tracker.AddScore(ev.SessionID, points)
+	}
+
+	for _, d := range detections {
+		p.tracker.AddTechnique(ev.SessionID, d.TechniqueID)
+	}
 }
 
 func (p *Processor) persist(
@@ -197,12 +226,24 @@ func (p *Processor) persist(
 			Msg("failed to upsert attacker")
 	}
 
-	if ioc := ipIOC(ev); ioc != nil {
+	p.persistIOCs(ctx, ev)
+}
+
+func (p *Processor) persistIOCs(
+	ctx context.Context, ev *types.Event,
+) {
+	if p.extractor == nil {
+		return
+	}
+
+	iocs := p.extractor.Extract(ev)
+	for _, ioc := range iocs {
 		if err := p.store.UpsertIOC(ctx, ioc); err != nil {
 			p.logger.Error().
 				Err(err).
-				Str("ip", ev.SourceIP).
-				Msg("failed to upsert ip ioc")
+				Str("ioc_type", ioc.Type.String()).
+				Str("ioc_value", ioc.Value).
+				Msg("failed to upsert ioc")
 		}
 	}
 }
@@ -257,35 +298,4 @@ func buildAttacker(ev *types.Event) *types.Attacker {
 		a.Geo = *ev.Geo
 	}
 	return a
-}
-
-func ipIOC(ev *types.Event) *types.IOC {
-	ip := ev.SourceIP
-	if ip == "" {
-		return nil
-	}
-
-	parsed := net.ParseIP(ip)
-	if parsed == nil {
-		return nil
-	}
-
-	if parsed.IsLoopback() || parsed.IsPrivate() {
-		return nil
-	}
-
-	iocType := types.IOCIPv4
-	if parsed.To4() == nil {
-		iocType = types.IOCIPv6
-	}
-
-	return &types.IOC{
-		Type:       iocType,
-		Value:      ip,
-		FirstSeen:  ev.Timestamp,
-		LastSeen:   ev.Timestamp,
-		SightCount: 1,
-		Confidence: 50,
-		Source:     ev.ServiceType.String() + "-honeypot",
-	}
 }

@@ -32,6 +32,17 @@ services:
       timeout: 5s
       retries: 5
 
+  geoip-updater:
+    build:
+      context: .
+      dockerfile: infra/docker/geoip-updater
+    restart: "no"
+    environment:
+      GEOIP_ACCOUNT_ID: ${GEOIP_ACCOUNT_ID}
+      GEOIP_LICENSE_KEY: ${GEOIP_LICENSE_KEY}
+    volumes:
+      - geoipdata:/usr/share/GeoIP
+
   backend:
     build:
       context: .
@@ -41,12 +52,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      geoip-updater:
+        condition: service_completed_successfully
     environment:
       HIVE_DATABASE_URL: postgres://hive:hive@postgres:5432/hive?sslmode=disable
       HIVE_REDIS_URL: redis://redis:6379
       HIVE_SENSOR_ID: hive-dev
       HIVE_LOG_LEVEL: debug
       HIVE_GEOIP_DB_PATH: /usr/share/GeoIP/GeoLite2-City.mmdb
+      HIVE_GEOIP_ASN_DB_PATH: /usr/share/GeoIP/GeoLite2-ASN.mmdb
       HIVE_CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
     ports:
       - "1262:2222"
@@ -55,13 +69,16 @@ services:
       - "4459:4450"
       - "3344:3307"
       - "6355:6380"
+      - "2323:2333"
       - "8184:8000"
+      - "18447:2525"
     volumes:
       - .:/app
       - dev-gomod:/go/pkg/mod
       - dev-gocache:/root/.cache/go-build
       - dev-replays:/data/replays
       - dev-hostkeys:/data
+      - geoipdata:/usr/share/GeoIP
 
   frontend:
     build:
@@ -70,6 +87,7 @@ services:
     depends_on:
       - backend
     environment:
+      CI: true
       VITE_API_TARGET: http://backend:8000
       VITE_WS_TARGET: ws://backend:8000
     ports:
@@ -85,3 +103,4 @@ volumes:
   dev-gocache:
   dev-replays:
   dev-hostkeys:
+  geoipdata:
