@@ -15,6 +15,7 @@ import {
   useStatsCredentials,
   useStatsOverview,
   useTrendingCredentials,
+  useAlerts,
 } from '@/api/hooks'
 import { AttackMap } from '@/components/attack-map'
 import { EventFeed } from '@/components/event-feed'
@@ -39,6 +40,7 @@ export function DashboardPage() {
   const { data: credentials } = useStatsCredentials()
   const { data: trending } = useTrendingCredentials()
   const { data: attackers } = useAttackers()
+  const { data: alerts } = useAlerts()
   const wsEventCount = useWebSocketStore((s) => s.eventCount)
 
   const serviceData = stats
@@ -180,6 +182,24 @@ export function DashboardPage() {
                   <span className={styles.listValue}>
                     {t.growth_ratio.toFixed(1)}x ({t.recent_count})
                   </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {alerts && alerts.length > 0 && (
+        <div className={styles.row}>
+          <section className={styles.panel}>
+            <h2 className={styles.panelLabel}>Recent Alerts</h2>
+            <div className={styles.list}>
+              {alerts.map((a) => (
+                <div key={a.id} className={styles.listRow}>
+                  <span className={styles.listLabel}>
+                    [{a.severity.toUpperCase()}] {a.summary}
+                  </span>
+                  <span className={styles.listValue}>{a.delivery}</span>
                 </div>
               ))}
             </div>

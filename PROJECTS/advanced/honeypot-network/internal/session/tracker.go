@@ -200,3 +200,19 @@ func (t *Tracker) Count() int {
 	defer t.mu.RUnlock()
 	return len(t.sessions)
 }
+
+
+// Snapshot returns a copy of an active session, or nil.
+func (t *Tracker) Snapshot(sessionID string) *types.Session {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	sess, ok := t.sessions[sessionID]
+	if !ok {
+		return nil
+	}
+	cp := *sess
+	cp.MITRETechniques = append([]string(nil), sess.MITRETechniques...)
+	cp.Tags = append([]string(nil), sess.Tags...)
+	return &cp
+}

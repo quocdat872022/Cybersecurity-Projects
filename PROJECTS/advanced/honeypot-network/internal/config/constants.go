@@ -130,3 +130,13 @@ const (
 	TopicExploit    = "exploit"
 	TopicFile       = "file"
 )
+
+const (
+	DefaultAlertCooldown  = 5 * time.Minute
+	DefaultAlertMinScore  = 60
+	DefaultAlertQueueSize = 256
+	DefaultAlertWorkers   = 2
+	DefaultAlertTimeout   = 10 * time.Second
+	DefaultAlertHistory   = 500
+)
+
