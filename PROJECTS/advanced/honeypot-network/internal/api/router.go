@@ -28,6 +28,7 @@ import (
 	"github.com/CarterPerez-dev/hive/internal/session"
 	"github.com/CarterPerez-dev/hive/internal/store"
 	"github.com/CarterPerez-dev/hive/pkg/types"
+	"github.com/CarterPerez-dev/hive/internal/alert"
 )
 
 const (
@@ -51,6 +52,7 @@ type Server struct {
 	router    *chi.Mux
 	replayDir string
 	startedAt time.Time
+	alerts *alert.Store
 }
 
 func New(
@@ -60,6 +62,7 @@ func New(
 	tracker *session.Tracker,
 	cfg *config.Config,
 	logger *zerolog.Logger,
+	alerts *alert.Store,
 ) *Server {
 	s := &Server{
 		store:     db,
@@ -70,6 +73,7 @@ func New(
 		logger:    logger,
 		replayDir: cfg.Log.ReplayDir,
 		startedAt: time.Now().UTC(),
+		alerts: alerts,
 	}
 
 	s.router = s.buildRouter()
@@ -174,6 +178,8 @@ func (s *Server) buildRouter() *chi.Mux {
 		})
 
 		r.Get("/sensors", s.handleSensors)
+
+		r.Get("/alerts", s.handleAlerts)
 	})
 
 	r.Get("/ws/events", s.handleWebSocket)

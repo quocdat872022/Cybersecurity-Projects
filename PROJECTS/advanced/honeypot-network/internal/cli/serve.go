@@ -41,6 +41,8 @@ import (
 	"github.com/CarterPerez-dev/hive/internal/telnetd"
 	"github.com/CarterPerez-dev/hive/internal/ui"
 	"github.com/CarterPerez-dev/hive/pkg/types"
+	"github.com/CarterPerez-dev/hive/internal/alert"
+
 )
 
 func newServeCmd() *cobra.Command {
@@ -133,11 +135,24 @@ func runServe(ctx context.Context) error {
 		cfg, bus, &logger, tracker, limiter,
 	)
 
+	alertStore := alert.NewStore(config.DefaultAlertHistory)
 	apiSvc := api.New(
 		pgStore, bus, detector.Index(),
-		tracker, cfg, &logger,
+		tracker, cfg, &logger, alertStore,
 	)
 	services = append(services, apiSvc)
+
+	if cfg.Alert.Enabled {
+		alertDetector := mitre.NewDetector()
+		alertSvc, err := alert.New(
+			cfg, bus, alertDetector, alertDetector.Index(),
+			tracker, alertStore, &logger,
+		)
+		if err != nil {
+			return fmt.Errorf("configuring alerting: %w", err)
+		}
+		services = append(services, alertSvc)
+	}
 
 	logger.Info().
 		Int("services", len(services)).

@@ -22,4 +22,5 @@ __pycache__/
 PROJECTS/advanced/honeypot-network/frontend/pnpm-lock.yaml
 PROJECTS/advanced/honeypot-network/frontend/package.json
 PROJECTS/advanced/honeypot-network/frontend/pnpm-workspace.yaml
+PROJECTS/advanced/honeypot-network/frontend/.pnpm-store
 

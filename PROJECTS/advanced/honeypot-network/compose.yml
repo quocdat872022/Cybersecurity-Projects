@@ -62,6 +62,7 @@ services:
       HIVE_GEOIP_DB_PATH: /usr/share/GeoIP/GeoLite2-City.mmdb
       HIVE_GEOIP_ASN_DB_PATH: /usr/share/GeoIP/GeoLite2-ASN.mmdb
       HIVE_CORS_ORIGINS: ${HIVE_CORS_ORIGINS:-http://localhost,http://localhost:3000}
+      HIVE_ALERT_WEBHOOK_URL: ${HIVE_ALERT_WEBHOOK_URL:-}
     ports:
       - "${HIVE_SSH_PORT:-2211}:2222"
       - "${HIVE_TELNET_PORT:-2311}:2333"

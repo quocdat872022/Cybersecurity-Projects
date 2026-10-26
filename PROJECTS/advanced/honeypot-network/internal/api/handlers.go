@@ -26,6 +26,7 @@ import (
 
 	"github.com/CarterPerez-dev/hive/internal/intel"
 	"github.com/CarterPerez-dev/hive/pkg/types"
+	"github.com/CarterPerez-dev/hive/internal/alert"
 )
 
 type apiResponse struct {
@@ -723,4 +724,17 @@ func parseDuration(r *http.Request) time.Duration {
 	}
 
 	return d
+}
+
+func (s *Server) handleAlerts(
+	w http.ResponseWriter, r *http.Request,
+) {
+	limit, _ := parsePagination(r)
+
+	records := []alert.Record{}
+	if s.alerts != nil {
+		records = s.alerts.Recent(limit)
+	}
+
+	s.writeJSON(w, http.StatusOK, apiResponse{Data: records})
 }

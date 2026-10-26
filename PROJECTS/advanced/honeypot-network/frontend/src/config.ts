@@ -35,6 +35,9 @@ export const API_ENDPOINTS = {
   SENSORS: {
     LIST: '/sensors',
   },
+  ALERTS: { 
+    LIST: '/alerts' 
+  },
 } as const
 
 export const QUERY_KEYS = {
@@ -81,6 +84,10 @@ export const QUERY_KEYS = {
   SENSORS: {
     ALL: ['sensors'] as const,
     LIST: () => [...QUERY_KEYS.SENSORS.ALL, 'list'] as const,
+  },
+  ALERTS: {
+    ALL: ['alerts'] as const,
+    LIST: (limit: number) => [...QUERY_KEYS.ALERTS.ALL, 'list', { limit }] as const,
   },
 } as const
 

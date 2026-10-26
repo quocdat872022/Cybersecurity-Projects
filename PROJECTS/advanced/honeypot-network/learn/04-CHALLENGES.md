@@ -621,7 +621,7 @@ Track your progress:
 - [x] Easy 3: Credential Analytics
 - [x] Intermediate 4: SMTP Honeypot
 - [x] Intermediate 5: Session Threat Scoring
-- [ ] Intermediate 6: Webhook Alerting
+- [x] Intermediate 6: Webhook Alerting
 - [ ] Advanced 7: Multi-Sensor Deployment
 - [ ] Advanced 8: SIEM Integration Pipeline
 - [ ] Expert 9: ML-Based Anomaly Detection

@@ -38,6 +38,7 @@ type Config struct {
 	API      APIConfig      `yaml:"api"`
 	GeoIP    GeoIPConfig    `yaml:"geoip"`
 	Log      LogConfig      `yaml:"log"`
+	Alert    AlertConfig    `yaml:"alert"`
 }
 
 type SensorConfig struct {
@@ -134,6 +135,15 @@ type LogConfig struct {
 	ReplayDir  string `yaml:"replay_dir"`
 }
 
+type AlertConfig struct {
+	Enabled    bool          `yaml:"enabled"`
+	WebhookURL string        `yaml:"webhook_url"`
+	Secret     string        `yaml:"secret"`
+	Rules      []string      `yaml:"rules"`
+	Cooldown   time.Duration `yaml:"cooldown"`
+	MinScore   int           `yaml:"min_score"`
+}
+
 func Default() *Config {
 	hostname, _ := os.Hostname()
 	if hostname == "" {
@@ -221,6 +231,11 @@ func Default() *Config {
 			JSONFormat: true,
 			ReplayDir:  DefaultReplayDir,
 		},
+		Alert: AlertConfig{
+			Enabled:  true,
+			Cooldown: DefaultAlertCooldown,
+			MinScore: DefaultAlertMinScore,
+		},
 	}
 }
 
@@ -295,6 +310,7 @@ func applyEnvOverrides(cfg *Config) {
 	applyBoolOverride("HIVE_SMB_ENABLED", &cfg.SMB.Enabled)
 	applyBoolOverride("HIVE_MYSQL_ENABLED", &cfg.MySQL.Enabled)
 	applyBoolOverride("HIVE_REDIS_ENABLED", &cfg.Redis.Enabled)
+	applyAlertOverrides(cfg)
 }
 
 func applyPortOverride(envKey string, target *int) {
@@ -309,6 +325,25 @@ func applyBoolOverride(envKey string, target *bool) {
 	if v := os.Getenv(envKey); v != "" {
 		*target = v == "true" || v == "1"
 	}
+}
+
+func applyAlertOverrides(cfg *Config) {
+	applyBoolOverride("HIVE_ALERT_ENABLED", &cfg.Alert.Enabled)
+	if v := os.Getenv("HIVE_ALERT_WEBHOOK_URL"); v != "" {
+		cfg.Alert.WebhookURL = v
+	}
+	if v := os.Getenv("HIVE_ALERT_WEBHOOK_SECRET"); v != "" {
+		cfg.Alert.Secret = v
+	}
+	if v := os.Getenv("HIVE_ALERT_RULES"); v != "" {
+		cfg.Alert.Rules = strings.Split(v, ",")
+	}
+	if v := os.Getenv("HIVE_ALERT_COOLDOWN"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			cfg.Alert.Cooldown = d
+		}
+	}
+	applyPortOverride("HIVE_ALERT_MIN_SCORE", &cfg.Alert.MinScore)
 }
 
 func (c *Config) Addr(port int) string {
