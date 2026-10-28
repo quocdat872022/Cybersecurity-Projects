@@ -90,6 +90,12 @@ dev-keygen:
 dev-version:
     go run ./cmd/hive version
 
+dev-central: 
+    go run ./cmd/hive central
+
+dev-agent: 
+    go run ./cmd/hive agent --central localhost:9090
+
 [group('dev')]
 geoip-update:
     GEOIP_DEST=data/geoip bash infra/geoip/update.sh

@@ -39,6 +39,7 @@ export function EventsPage() {
             <tr>
               <th>Time</th>
               <th>Service</th>
+              <th>Sensor</th>
               <th>Type</th>
               <th>Source IP</th>
               <th>Port</th>
@@ -52,6 +53,7 @@ export function EventsPage() {
                 <td>
                   <ServiceBadge service={ev.service_type} />
                 </td>
+                <td>{ev.sensor_id}</td>
                 <td>{ev.event_type}</td>
                 <td>{ev.source_ip}</td>
                 <td>{ev.dest_port}</td>

@@ -29,6 +29,8 @@ import (
 	"github.com/CarterPerez-dev/hive/internal/store"
 	"github.com/CarterPerez-dev/hive/pkg/types"
 	"github.com/CarterPerez-dev/hive/internal/alert"
+	"github.com/CarterPerez-dev/hive/internal/fleet"
+
 )
 
 const (
@@ -53,6 +55,7 @@ type Server struct {
 	replayDir string
 	startedAt time.Time
 	alerts *alert.Store
+	corr *fleet.Correlator
 }
 
 func New(
@@ -180,6 +183,8 @@ func (s *Server) buildRouter() *chi.Mux {
 		r.Get("/sensors", s.handleSensors)
 
 		r.Get("/alerts", s.handleAlerts)
+
+		r.Get("/correlations", s.handleCorrelations)
 	})
 
 	r.Get("/ws/events", s.handleWebSocket)

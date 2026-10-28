@@ -91,6 +91,8 @@ MITRE ATT&CK techniques, and generate threat intelligence.`,
 		newMigrateCmd(),
 		newKeygenCmd(),
 		newVersionCmd(),
+		newAgentCmd(),
+		newCentralCmd(),
 	)
 
 	return root

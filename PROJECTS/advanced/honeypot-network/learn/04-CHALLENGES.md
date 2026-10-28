@@ -622,7 +622,7 @@ Track your progress:
 - [x] Intermediate 4: SMTP Honeypot
 - [x] Intermediate 5: Session Threat Scoring
 - [x] Intermediate 6: Webhook Alerting
-- [ ] Advanced 7: Multi-Sensor Deployment
+- [x] Advanced 7: Multi-Sensor Deployment
 - [ ] Advanced 8: SIEM Integration Pipeline
 - [ ] Expert 9: ML-Based Anomaly Detection
 - [ ] Expert 10: Attacker Playbook Reconstruction

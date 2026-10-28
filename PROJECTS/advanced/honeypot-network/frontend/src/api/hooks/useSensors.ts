@@ -23,6 +23,6 @@ export const useSensors = (): UseQueryResult<SensorInfo[], Error> => {
       )
       return response.data.data
     },
-    ...QUERY_STRATEGIES.static,
+    ...QUERY_STRATEGIES.slow,
   })
 }

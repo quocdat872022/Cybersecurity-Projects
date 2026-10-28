@@ -1,0 +1,36 @@
+// ©AngelaMos | 2026
+// sensor.proto
+//
+// Wire contract for sensor <-> central communication. The Go
+// implementation in internal/sensorrpc registers this service by hand
+// with a JSON codec (content-subtype "json"), so no protoc step is
+// required. Field names below match the JSON tags in messages.go; to
+// move to binary protobuf, generate stubs from this file and delete
+// codec.go.
+
+syntax = "proto3";
+package hive.sensor.v1;
+
+service SensorHub {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  // Bidirectional: sensor sends Envelopes, hub acks each by seq.
+  rpc StreamEvents(stream Envelope) returns (stream Ack);
+}
+
+message RegisterRequest  { Sensor sensor = 1; }
+message RegisterResponse { bool accepted = 1; string message = 2; int32 heartbeat_seconds = 3; }
+message HeartbeatRequest { string sensor_id = 1; int32 active_sessions = 2; }
+message HeartbeatResponse { string server_time = 1; }
+
+message Envelope {
+  uint64 seq = 1;
+  string sensor_id = 2;
+  string kind = 3;        // event | session_start | session_end | recording
+  string event_json = 4;  // types.Event
+  string session_json = 5;// types.Session
+  string session_id = 6;  // recording only
+  bytes  recording = 7;   // asciicast v2
+}
+message Ack { uint64 seq = 1; }
+message Sensor { string id = 1; string hostname = 2; string region = 3; repeated string services = 4; }

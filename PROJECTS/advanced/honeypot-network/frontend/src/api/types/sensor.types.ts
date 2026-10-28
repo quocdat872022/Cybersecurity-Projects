@@ -12,6 +12,8 @@ export const sensorInfoSchema = z.object({
   services: z.array(z.string()),
   started_at: z.string(),
   status: z.string(),
+  last_heartbeat: z.string().optional(),
+  active_sessions: z.number().optional(),
 })
 
 export type SensorInfo = z.infer<typeof sensorInfoSchema>

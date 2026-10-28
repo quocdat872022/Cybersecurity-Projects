@@ -152,5 +152,6 @@ type Store interface {
 	CredentialRepository
 	IOCRepository
 	MITRERepository
+	SensorRepository
 	Close()
 }
