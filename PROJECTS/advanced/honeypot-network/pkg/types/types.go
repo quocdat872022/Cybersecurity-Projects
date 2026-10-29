@@ -298,13 +298,15 @@ type MITREDetection struct {
 }
 
 type Sensor struct {
-	ID        string    `json:"id"`
-	Hostname  string    `json:"hostname"`
-	Region    string    `json:"region"`
-	PublicIP  string    `json:"public_ip"`
-	Services  []string  `json:"services"`
-	StartedAt time.Time `json:"started_at"`
-	Status    string    `json:"status"`
+	ID             string     `json:"id"`
+	Hostname       string     `json:"hostname"`
+	Region         string     `json:"region"`
+	PublicIP       string     `json:"public_ip"`
+	Services       []string   `json:"services"`
+	StartedAt      time.Time  `json:"started_at"`
+	Status         string     `json:"status"`
+	LastHeartbeat  *time.Time `json:"last_heartbeat,omitempty"`
+	ActiveSessions int        `json:"active_sessions"`
 }
 
 type Service interface {

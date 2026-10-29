@@ -1,0 +1,35 @@
+# ©AngelaMos | 2026
+# compose.agent.yml
+#
+# Sensor host: honeypots only, forwards to central.
+#   docker compose -f compose.agent.yml up -d
+
+services:
+  agent:
+    build:
+      context: .
+      dockerfile: infra/docker/go.prod
+    restart: unless-stopped
+    command: ["agent"]
+    environment:
+      HIVE_SENSOR_ID: ${HIVE_SENSOR_ID:?unique id per sensor}
+      HIVE_SENSOR_REGION: ${HIVE_SENSOR_REGION:-local}
+      HIVE_CENTRAL_ADDR: ${HIVE_CENTRAL_ADDR:?central host:port}
+      HIVE_CLUSTER_TOKEN: ${HIVE_CLUSTER_TOKEN:?shared secret}
+      HIVE_LOG_LEVEL: ${HIVE_LOG_LEVEL:-info}
+    ports:
+      - "${HIVE_SSH_PORT:-2211}:2222"
+      - "${HIVE_TELNET_PORT:-2311}:2333"
+      - "${HIVE_SMTP_PORT:-2825}:2525"
+      - "${HIVE_HTTP_PORT:-8055}:8080"
+      - "${HIVE_FTP_PORT:-21272}:2121"
+      - "${HIVE_SMB_PORT:-46353}:4450"
+      - "${HIVE_MYSQL_PORT:-33077}:3307"
+      - "${HIVE_REDIS_PORT:-44801}:6380"
+    volumes:
+      - replays:/data/replays
+      - hostkeys:/data
+
+volumes:
+  replays:
+  hostkeys:

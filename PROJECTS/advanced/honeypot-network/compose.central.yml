@@ -1,0 +1,15 @@
+# ©AngelaMos | 2026
+# compose.central.yml
+#
+# Overlay for the central node:
+#   docker compose -f compose.yml -f compose.central.yml up -d
+# Runs `hive central` (hub + storage + API) instead of `hive serve`.
+
+services:
+  backend:
+    command: ["central"]
+    environment:
+      HIVE_CLUSTER_TOKEN: ${HIVE_CLUSTER_TOKEN:?set a shared secret}
+      HIVE_CORRELATION_WINDOW: ${HIVE_CORRELATION_WINDOW:-10m}
+    ports:
+      - "${HIVE_GRPC_PORT:-9090}:9090"

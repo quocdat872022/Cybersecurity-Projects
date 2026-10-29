@@ -39,6 +39,7 @@ type Config struct {
 	GeoIP    GeoIPConfig    `yaml:"geoip"`
 	Log      LogConfig      `yaml:"log"`
 	Alert    AlertConfig    `yaml:"alert"`
+	Cluster ClusterConfig	`yaml:"cluster"`
 }
 
 type SensorConfig struct {
@@ -236,6 +237,7 @@ func Default() *Config {
 			Cooldown: DefaultAlertCooldown,
 			MinScore: DefaultAlertMinScore,
 		},
+		Cluster: DefaultCluster(),
 	}
 }
 
@@ -311,6 +313,7 @@ func applyEnvOverrides(cfg *Config) {
 	applyBoolOverride("HIVE_MYSQL_ENABLED", &cfg.MySQL.Enabled)
 	applyBoolOverride("HIVE_REDIS_ENABLED", &cfg.Redis.Enabled)
 	applyAlertOverrides(cfg)
+	applyClusterEnv(cfg)
 }
 
 func applyPortOverride(envKey string, target *int) {

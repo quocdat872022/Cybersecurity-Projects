@@ -16,6 +16,7 @@ import {
   useStatsOverview,
   useTrendingCredentials,
   useAlerts,
+  useSensors,
 } from '@/api/hooks'
 import { AttackMap } from '@/components/attack-map'
 import { EventFeed } from '@/components/event-feed'
@@ -41,6 +42,7 @@ export function DashboardPage() {
   const { data: trending } = useTrendingCredentials()
   const { data: attackers } = useAttackers()
   const { data: alerts } = useAlerts()
+  const { data: sensors } = useSensors()
   const wsEventCount = useWebSocketStore((s) => s.eventCount)
 
   const serviceData = stats
@@ -137,6 +139,24 @@ export function DashboardPage() {
           </div>
         </section>
       </div>
+
+      {sensors && sensors.length > 0 && (
+        <div className={styles.row}>
+          <section className={styles.panel}>
+            <h2 className={styles.panelLabel}>Sensors</h2>
+            <div className={styles.list}>
+              {sensors.map((s) => (
+                <div key={s.id} className={styles.listRow}>
+                  <span className={styles.listLabel}>{s.id} / {s.region}</span>
+                  <span className={styles.listValue}>
+                    {s.status.toUpperCase()} - {s.active_sessions ?? 0} sessions
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       {credentials && (
         <div className={styles.row}>

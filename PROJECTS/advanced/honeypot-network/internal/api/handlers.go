@@ -159,7 +159,7 @@ func (s *Server) handleStatsOverview(
 	s.writeJSON(w, http.StatusOK, apiResponse{
 		Data: overviewStats{
 			TotalEvents:     totalEvents,
-			ActiveSessions:  s.tracker.Count(),
+			ActiveSessions:  s.tracker.Count() + s.remoteActiveSessions(r),
 			EventsByService: serviceMap,
 		},
 	})
@@ -635,8 +635,13 @@ func (s *Server) handleIOCExportBlocklist(
 }
 
 func (s *Server) handleSensors(
-	w http.ResponseWriter, _ *http.Request,
+	w http.ResponseWriter, r *http.Request,
 ) {
+	if s.isCentral() {
+		s.handleClusterSensors(w, r)
+		return
+	}
+
 	var services []string
 	if s.cfg.SSH.Enabled {
 		services = append(services, "ssh")
