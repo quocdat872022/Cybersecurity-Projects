@@ -178,3 +178,13 @@ REDOS_PROBE_TIMEOUT_SECONDS: float = 1.0
 
 DEFAULT_DEBOUNCE_SECONDS: float = 0.5
 POLL_INTERVAL_SECONDS: float = 0.1
+
+FEEDBACK_DB_FILENAME: str = ".dlp-scanner-feedback.db"
+FP_MIN_TRAIN_EXAMPLES: int = 50
+FP_MIN_PER_CLASS: int = 5
+FP_RETRAIN_THRESHOLDS: tuple[int, ...] = (50, 100, 500, 1000)
+FP_RETRAIN_INTERVAL: int = 1000
+FP_SUPPRESS_THRESHOLD: float = 0.80
+FP_DEMOTE_LEVELS: int = 2
+FP_TP_CLASS_WEIGHT: float = 2.0   # a demoted TP costs more than a missed FP
+FP_HASH_BUCKETS: int = 256

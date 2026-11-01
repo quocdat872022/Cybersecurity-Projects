@@ -41,6 +41,7 @@ from dlp_scanner.scanners.file_scanner import (
 from dlp_scanner.scanners.network_scanner import (
     NetworkScanner,
 )
+from dlp_scanner.ml.feedback import FalsePositiveFilter
 
 
 log = structlog.get_logger()
@@ -73,6 +74,10 @@ class ScanEngine:
             custom_rules_dir = detection.custom_rules_dir or None,
         )
 
+        self._fp_filter = (
+            FalsePositiveFilter(config.fp_filter) if config.fp_filter.enabled else None
+        )
+
         # Log active severity overrides at startup so operators can confirm the policy is loaded correctly.
         overrides = config.compliance.severity_overrides
         if overrides:
@@ -85,6 +90,11 @@ class ScanEngine:
             rule_count = self._registry.rule_count,
             custom_rule_count = self._registry.custom_rule_count,
         )
+
+    def _postprocess(self, result: ScanResult) -> ScanResult:
+        if self._fp_filter is not None:
+            self._fp_filter.apply(result)
+        return result
 
     def scan_files(
         self,
@@ -109,7 +119,7 @@ class ScanEngine:
             self._registry,
             no_cache=no_cache,
         )
-        result = scanner.scan(target)
+        result = self._postprocess(scanner.scan(target))
         log.info(
             "file_scan_complete",
             target = target,
@@ -123,7 +133,7 @@ class ScanEngine:
         Scan database target for sensitive data
         """
         scanner = DatabaseScanner(self._config, self._registry)
-        result = scanner.scan(target)
+        result = self._postprocess(scanner.scan(target))
         log.info(
             "database_scan_complete",
             target = target,
@@ -137,7 +147,7 @@ class ScanEngine:
         Scan network capture file for sensitive data
         """
         scanner = NetworkScanner(self._config, self._registry)
-        result = scanner.scan(target)
+        result = self._postprocess(scanner.scan(target))
         log.info(
             "network_scan_complete",
             target = target,

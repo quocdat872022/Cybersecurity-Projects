@@ -149,7 +149,7 @@ class TestFileScan:
              "json"],
         )
         assert result.exit_code == 0
-        data = json.loads(result.output)
+        data = json.loads(result.stdout)
         assert "findings" in data
 
     def test_scan_to_file(self, pii_dir: Path) -> None:

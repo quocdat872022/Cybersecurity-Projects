@@ -49,6 +49,9 @@ class Finding:
     detected_at: datetime = field(
         default_factory = lambda: datetime.now(UTC)
     )
+    fp_probability: float | None = None
+    suppressed: bool = False
+    original_severity: Severity | None = None
 
 
 @dataclass(slots = True)
@@ -67,6 +70,14 @@ class ScanResult:
     errors: list[str] = field(default_factory = list)
 
     @property
+    def active_findings(self) -> list[Finding]:
+        return [f for f in self.findings if not f.suppressed]
+
+    @property
+    def suppressed_findings(self) -> list[Finding]:
+        return [f for f in self.findings if f.suppressed]
+
+    @property
     def findings_by_severity(self) -> dict[str, int]:
         """
         Count findings grouped by severity level
@@ -78,7 +89,7 @@ class ScanResult:
                          "medium": 0,
                          "low": 0,
                      }
-        for f in self.findings:
+        for f in self.active_findings:
             counts[f.severity] = counts.get(f.severity, 0) + 1
         return counts
 
@@ -88,7 +99,7 @@ class ScanResult:
         Count findings grouped by rule ID
         """
         counts: dict[str, int] = {}
-        for f in self.findings:
+        for f in self.active_findings:
             counts[f.rule_id] = counts.get(f.rule_id, 0) + 1
         return counts
 
@@ -98,7 +109,7 @@ class ScanResult:
         Count findings grouped by compliance framework
         """
         counts: dict[str, int] = {}
-        for f in self.findings:
+        for f in self.active_findings:
             for fw in f.compliance_frameworks:
                 counts[fw] = counts.get(fw, 0) + 1
         return counts

@@ -95,3 +95,9 @@ logging:
   level: "INFO"
   json_output: false
   log_file: ""
+
+fp_filter:
+  enabled: true
+  db_path: ""              # default: .dlp-scanner-feedback.db next to config / cwd
+  suppress_threshold: 0.80 # demote when P(false positive) >= this
+  demote_levels: 2

@@ -11,3 +11,6 @@ build/
 .pytest_cache/
 report*.html
 results.*
+~/.vscode-root
+.dlp-scanner-*.db*
+*.db

@@ -398,16 +398,16 @@ Target: under 60 minutes for 1 million files with an average file size of 10KB.
 
 Track your progress:
 
-- [ ] Easy 1: Date of Birth Rule
-- [ ] Easy 2: HTML Report Output
-- [ ] Easy 3: Allowlist by File Path
-- [ ] Intermediate 4: Incremental Scanning
-- [ ] Intermediate 5: Severity Override
-- [ ] Intermediate 6: Column Name Heuristic
-- [ ] Advanced 7: Custom Rule Language
-- [ ] Advanced 8: Real-Time Monitoring
-- [ ] Advanced 9: SIEM Integration
-- [ ] Expert 10: ML False Positive Reduction
+- [x] Easy 1: Date of Birth Rule
+- [x] Easy 2: HTML Report Output
+- [x] Easy 3: Allowlist by File Path
+- [x] Intermediate 4: Incremental Scanning
+- [x] Intermediate 5: Severity Override
+- [x] Intermediate 6: Column Name Heuristic
+- [x] Advanced 7: Custom Rule Language
+- [x] Advanced 8: Real-Time Monitoring
+- [x] Advanced 9: SIEM Integration
+- [x] Expert 10: ML False Positive Reduction
 - [ ] Integration: GitHub Code Scanning
 - [ ] Integration: S3 Bucket Scanning
 - [ ] Performance: 1 Million Files

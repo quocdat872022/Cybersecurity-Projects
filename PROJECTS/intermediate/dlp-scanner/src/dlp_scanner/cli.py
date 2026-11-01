@@ -19,6 +19,7 @@ from dlp_scanner.commands.report import report_app
 from dlp_scanner.commands.cache import cache_app
 from dlp_scanner.commands.scan import register
 from dlp_scanner.commands.watch import register as register_watch
+from dlp_scanner.commands.feedback import feedback
 
 
 app = typer.Typer(
@@ -29,6 +30,8 @@ app = typer.Typer(
     ),
     no_args_is_help = True,
 )
+
+app.command("feedback")(feedback)
 
 
 def _version_callback(value: bool) -> None:

@@ -26,10 +26,21 @@ from dlp_scanner.constants import (
     OutputFormat,
     RedactionStyle,
     Severity,
+    FP_DEMOTE_LEVELS, 
+    FP_SUPPRESS_THRESHOLD,
 )
 
 SiemType = Literal["", "syslog", "splunk_hec"]
 SyslogProtocol = Literal["tcp", "udp"]
+
+class FalsePositiveConfig(BaseModel):
+    """
+    Settings for the analyst-trained false-positive filter
+    """
+    enabled: bool = True
+    db_path: str = ""
+    suppress_threshold: float = Field(default = FP_SUPPRESS_THRESHOLD, ge = 0.5, le = 1.0)
+    demote_levels: int = Field(default = FP_DEMOTE_LEVELS, ge = 1, le = 3)
 
 class FileScanConfig(BaseModel):
     """
@@ -234,6 +245,7 @@ class ScanConfig(BaseModel):
     )
     output: OutputConfig = Field(default_factory = OutputConfig)
     logging: LoggingConfig = Field(default_factory = LoggingConfig)
+    fp_filter: FalsePositiveConfig = Field(default_factory = FalsePositiveConfig)
 
 
 def load_config(path: Path | None = None) -> ScanConfig:
@@ -258,6 +270,8 @@ def load_config(path: Path | None = None) -> ScanConfig:
     raw: dict[str, Any] = yaml.load(path) or {}
 
     scan_section = raw.get("scan", {})
+
+    
     return ScanConfig(
         file = FileScanConfig(**scan_section.get("file",
                                                  {})),
@@ -273,4 +287,7 @@ def load_config(path: Path | None = None) -> ScanConfig:
                                         {})),
         logging = LoggingConfig(**raw.get("logging",
                                           {})),
+        fp_filter = FalsePositiveConfig(**raw.get("fp_filter", 
+                                                  {})),
     )
+    

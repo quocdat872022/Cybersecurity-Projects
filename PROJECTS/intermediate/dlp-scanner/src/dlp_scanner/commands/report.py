@@ -182,6 +182,10 @@ def _rebuild_result(
             finding.detected_at = (
                 datetime.fromisoformat(f_data["detected_at"])
             )
+            finding.fp_probability = f_data.get("fp_probability")
+            finding.suppressed = bool(f_data.get("suppressed", False))
+            finding.original_severity = f_data.get("original_severity")
+        
 
         result.findings.append(finding)
 

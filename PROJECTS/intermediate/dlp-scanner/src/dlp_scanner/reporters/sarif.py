@@ -1,6 +1,10 @@
 """
 ©AngelaMos | 2026
 sarif.py
+
+Challenge 10: findings demoted by the false-positive classifier are
+emitted with a SARIF ``suppressions`` entry (status ``underReview``) so
+code-scanning UIs can hide them while keeping them auditable.
 """
 
 
@@ -109,7 +113,7 @@ def _build_result(
 
     location = _build_location(finding)
 
-    return {
+    entry: dict[str, Any] = {
         "ruleId": finding.rule_id,
         "ruleIndex": list(rules.keys()).index(finding.rule_id),
         "level": level,
@@ -127,8 +131,25 @@ def _build_result(
             "redactedSnippet": (finding.redacted_snippet),
             "complianceFrameworks": (finding.compliance_frameworks),
             "remediation": finding.remediation,
+            "fpProbability": finding.fp_probability,
         },
     }
+
+    if finding.suppressed:
+        entry["suppressions"] = [
+            {
+                "kind": "external",
+                "status": "underReview",
+                "justification": (
+                    f"Demoted by false-positive classifier "
+                    f"(p_fp={finding.fp_probability or 0:.2f}, "
+                    f"was {finding.original_severity or finding.severity}). "
+                    f"Review before dismissing."
+                ),
+            }
+        ]
+
+    return entry
 
 
 def _build_location(

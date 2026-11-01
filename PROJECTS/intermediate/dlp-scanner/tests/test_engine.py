@@ -216,5 +216,5 @@ class TestReporterMap:
     def test_all_formats_have_reporters(self) -> None:
         from dlp_scanner.engine import REPORTER_MAP
 
-        expected = {"console", "json", "sarif", "csv"}
+        expected = {"console", "json", "sarif", "csv", "html"}
         assert set(REPORTER_MAP.keys()) == expected

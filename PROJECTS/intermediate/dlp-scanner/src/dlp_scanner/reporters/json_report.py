@@ -94,6 +94,9 @@ def _serialize_finding(
         "remediation": finding.remediation,
         "column_signal": finding.column_signal,
         "detected_at": (finding.detected_at.isoformat()),
+                "fp_probability": finding.fp_probability,
+        "suppressed": finding.suppressed,
+        "original_severity": finding.original_severity,
     }
 
 
@@ -108,4 +111,5 @@ def _build_summary(
         "by_severity": result.findings_by_severity,
         "by_rule": result.findings_by_rule,
         "by_framework": result.findings_by_framework,
+        "suppressed": len(result.suppressed_findings),
     }

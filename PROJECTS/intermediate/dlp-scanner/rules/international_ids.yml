@@ -28,10 +28,10 @@ rules:
     compliance: ["DPDP"]
     validator: "none"
 
-  - id: CUSTOM_BAD_VALIDATOR
-    name: "test"
-    pattern: 'abc'
-    validator: "does_not_exist"
+  # - id: CUSTOM_BAD_VALIDATOR
+  #   name: "test"
+  #   pattern: 'abc'
+  #   validator: "does_not_exist"
 
   # --- What gets rejected and why -------------------------------
   #

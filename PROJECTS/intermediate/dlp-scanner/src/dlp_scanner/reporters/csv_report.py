@@ -25,6 +25,8 @@ CSV_COLUMNS: list[str] = [
     "redacted_snippet",
     "compliance_frameworks",
     "remediation",
+    "fp_probability", 
+    "suppressed",
 ]
 
 
@@ -58,6 +60,8 @@ class CsvReporter:
                     finding.redacted_snippet,
                     frameworks,
                     finding.remediation,
+                    "" if finding.fp_probability is None else f"{finding.fp_probability:.4f}",
+                    str(finding.suppressed).lower(),
                 ]
             )
 
