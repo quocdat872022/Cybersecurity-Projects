@@ -10,15 +10,17 @@ factory, runs SQLModel.metadata.create_all, connects
 Redis, initializes GeoIPService, constructs the Alert
 Dispatcher, attempts to load the ONNX InferenceEngine
 (falling back to rules-only mode), builds the Pipeline
-with configured queue sizes and ensemble weights, starts
-the LogTailer if the nginx log directory exists, and
-stores all components on app.state. On shutdown it stops
-the tailer, pipeline, GeoIP, Redis, and disposes the DB
-engine. _load_inference_engine lazily imports onnxruntime
--backed InferenceEngine, returning None if the dependency
-is missing or no models exist. create_app assembles the
-FastAPI instance and mounts all six API routers (health,
-ingest, threats, stats, models, websocket)
+with configured queue sizes and ensemble weights,
+registers the Prometheus PipelineCollector, starts the
+LogTailer if the nginx log directory exists, and stores
+all components on app.state. On shutdown it unregisters
+the collector, stops the tailer, pipeline, GeoIP, Redis,
+and disposes the DB engine. _load_inference_engine lazily
+imports onnxruntime-backed InferenceEngine, returning None
+if the dependency is missing or no models exist. create_app
+assembles the FastAPI instance and mounts all seven API
+routers (health, ingest, threats, stats, models, websocket,
+metrics)
 
 Connects to:
   config.py               - settings for all config values
@@ -29,6 +31,7 @@ Connects to:
   core/alerts/dispatcher  - AlertDispatcher
   core/enrichment/geoip   - GeoIPService
   core/redis_manager      - redis_manager
+  core/metrics            - PipelineCollector registration
   api/                    - all route modules
   models/                 - SQLModel registration
 """
@@ -58,6 +61,10 @@ from app.core.active_learning import LabelWatcher
 from app.core.enrichment.correlator import EventCorrelator
 from app.core.ingestion.error_pipeline import ErrorAnalysisResult, ErrorLogPipeline
 from app.core.ingestion.error_tailer import DualLogTailer
+from app.core.metrics import (  # Challenge 6
+    register_pipeline_collector,
+    unregister_pipeline_collector,
+)
 if TYPE_CHECKING:
     from app.core.detection.inference import InferenceEngine
 
@@ -120,6 +127,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     pipeline._on_parsed = correlator.record_access 
 
     await pipeline.start()
+
+    # Challenge 6: expose pipeline stats and queue depths to Prometheus
+    metrics_collector = register_pipeline_collector(pipeline)
 
     label_watcher = LabelWatcher(app.state.session_factory)
     label_watcher.start()
@@ -197,6 +207,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if tailer is not None:
         tailer.stop()
     await app.state.label_watcher.stop()
+    # Challenge 6: unregister before the pipeline stops so a hot reload
+    # or restart in the same process doesn't hit "Duplicated timeseries"
+    unregister_pipeline_collector(metrics_collector)
     await pipeline.stop()
     if error_pipeline is not None:
         await error_pipeline.stop()
@@ -250,6 +263,7 @@ def create_app() -> FastAPI:
 
     from app.api.health import router as health_router
     from app.api.ingest import router as ingest_router
+    from app.api.metrics import router as metrics_router  # Challenge 6
     from app.api.models_api import router as models_router
     from app.api.stats import router as stats_router
     from app.api.threats import router as threats_router
@@ -261,5 +275,6 @@ def create_app() -> FastAPI:
     app.include_router(stats_router)
     app.include_router(models_router)
     app.include_router(ws_router)
+    app.include_router(metrics_router)  # Challenge 6
 
     return app

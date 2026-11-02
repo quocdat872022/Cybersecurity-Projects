@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: vigil
+    folder: AngelusVigil
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

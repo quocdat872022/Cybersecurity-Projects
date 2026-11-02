@@ -19,7 +19,9 @@ on ScoredRequest for downstream observability. Stage 4
 on_result callback. Stages are connected by sized
 asyncio.Queues with poison-pill shutdown propagation.
 EnrichedRequest and ScoredRequest dataclasses carry data
-between stages
+between stages. The stats and queue_depths properties
+expose per-stage counters and queue sizes, and inference
+latency is observed in the INFERENCE_DURATION histogram
 
 Connects to:
   core/ingestion/parsers    - parse_combined
@@ -31,6 +33,9 @@ Connects to:
   core/detection/inference  - InferenceEngine.predict
   core/detection/ensemble   - normalize/fuse/blend scores
   core/alerts/dispatcher    - on_result callback
+  core/metrics              - INFERENCE_DURATION histogram,
+                              PipelineCollector reads stats
+                              and queue_depths
 """
 
 import asyncio
@@ -54,6 +59,7 @@ from app.core.features.aggregator import WindowAggregator
 from app.core.features.encoder import encode_for_inference
 from app.core.features.extractor import extract_request_features
 from app.core.ingestion.parsers import ParsedLogEntry, parse_combined
+from app.core.metrics import INFERENCE_DURATION 
 
 try:
     import numpy as np
@@ -160,6 +166,19 @@ class Pipeline:
         Return a snapshot of per-stage processed/error counters
         """
         return dict(self._stats)
+
+    @property
+    def queue_depths(self) -> dict[str, tuple[int, int]]:
+        """
+        Return (current size, max size) for each pipeline queue
+        """
+        queues: dict[str, asyncio.Queue] = {  # type: ignore[type-arg]
+            "raw": self.raw_queue,
+            "parsed": self._parsed_queue,
+            "feature": self._feature_queue,
+            "alert": self._alert_queue,
+        }
+        return {name: (q.qsize(), q.maxsize) for name, q in queues.items()}
 
     async def start(self) -> None:
         """
@@ -319,7 +338,8 @@ class Pipeline:
         and return normalized per-model scores
         """
         batch = np.array([feature_vector], dtype=np.float32)
-        raw = self._inference_engine.predict(batch)  # type: ignore[union-attr]
+        with INFERENCE_DURATION.time():  # Challenge 6
+            raw = self._inference_engine.predict(batch)  # type: ignore[union-attr]
         if raw is None:
             return None
 
